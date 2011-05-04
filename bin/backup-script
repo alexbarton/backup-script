@@ -130,6 +130,7 @@ for f in $sys; do
 	ssh_args_add=""
 	rsync_args_add=""
 	compress=1
+	ping=1
 	local=0
 
 	case "$system" in
@@ -161,7 +162,7 @@ for f in $sys; do
 	target="$target/$system"
 	mkdir -p "$target"
 
-	if [ "$local" -eq 0 ]; then
+	if [ "$local" -eq 0 -a "$ping" -ne 0 ]; then
 		# Check if system is alive
 		ping -c 1 "$system" >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
