@@ -127,6 +127,7 @@ for f in $sys; do
 	system=`basename $f`
 	user="root"
 	target=""
+	ssh_args_add=""
 	rsync_args_add=""
 	compress=1
 	local=0
@@ -170,9 +171,12 @@ for f in $sys; do
 		Message "OK, host \"$system\" seems to be alive."
 	fi
 
+	ssh_cmd="ssh"
+	[ -n "$ssh_args_add" ] && ssh_cmd="$ssh_cmd $ssh_args_add"
+
 	cmd="rsync --archive"
 	[ "$compress" -ne 0 ] && cmd="$cmd --compress"
-	cmd="$cmd --rsh=ssh --delete --delete-excluded --sparse"
+	cmd="$cmd --rsh=\"$ssh_cmd\" --delete --delete-excluded --sparse"
 	[ "$VERBOSE" -gt 0 ] && cmd="$cmd --progress"
 	cmd="$cmd --exclude=/BACKUP --exclude=/backup --exclude=/mnt"
 	cmd="$cmd --exclude=/dev --exclude=/proc --exclude=/sys"
