@@ -1,31 +1,14 @@
 #!/bin/bash
-# 2008-05-18, alex@barton-it.de
-#  - ignore files matching "*.sh" in backup-script.d/
-#  - fix: write PID into PID-file
-# 2008-05-14, alex@barton-it.de
-#  - switch to bash interpreter,
-#  - print warning if PID file can't be created.
-# 2007-07-31, alex@pingnet.de
-#  - added PID file to prevent simultaneous runs.
-#  - check for rsync exit code 20 (SIGINT).
-#  - enhanced SIGINT handler.
-# 2007-05-13, alex@pingnet.de
-#  - added config option "local" to rsync local system.
-# 2007-04-24, alex@pingnet.de
-#  - added "-p" (progress) switch
-# 2006-11-21, alex@pingnet.de
-#  - display storage statistik at the end of backup run.
-#  - config: added "compress" variable (default: on).
-# 2006-10-04, alex@pingnet.de
-#  - config: added "rsync_args_add" variable.
-# 2006-09-07, alex@pingnet.de
-#  - added sync-call at the end of the script.
-# 2006-09-04, alex@pingnet.de
-#  - use "--sparse" when calling rsync(1).
-# 2006-03-04, alex@pingnet.de
-#  - fixed typos ...
-# 2005-10-12, alex@pingnet.de
-#  - initial release.
+#
+# backup-script system for cloning systems using rsync
+# Copyright (c)2008-2011 Alexander Barton, alex@barton.de
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Please read the file COPYING, README and AUTHORS for more information.
+#
 
 NAME=`basename $0`
 CONF_D="/etc/backup-script.d"
