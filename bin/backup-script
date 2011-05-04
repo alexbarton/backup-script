@@ -194,7 +194,7 @@ for f in $sys; do
 	count_started=$count_started+1
 	rm -f "$target/.stamp"
 	
-	$cmd; ret=$?
+	$SHELL -c "$cmd"; ret=$?
 	echo "code=$ret" >"$target/.stamp"
 
 	if [ $ret -eq 20 ]; then
