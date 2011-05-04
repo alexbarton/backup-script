@@ -1,0 +1,257 @@
+#!/bin/bash
+# 2008-05-18, alex@barton-it.de
+#  - ignore files matching "*.sh" in backup-script.d/
+#  - fix: write PID into PID-file
+# 2008-05-14, alex@barton-it.de
+#  - switch to bash interpreter,
+#  - print warning if PID file can't be created.
+# 2007-07-31, alex@pingnet.de
+#  - added PID file to prevent simultaneous runs.
+#  - check for rsync exit code 20 (SIGINT).
+#  - enhanced SIGINT handler.
+# 2007-05-13, alex@pingnet.de
+#  - added config option "local" to rsync local system.
+# 2007-04-24, alex@pingnet.de
+#  - added "-p" (progress) switch
+# 2006-11-21, alex@pingnet.de
+#  - display storage statistik at the end of backup run.
+#  - config: added "compress" variable (default: on).
+# 2006-10-04, alex@pingnet.de
+#  - config: added "rsync_args_add" variable.
+# 2006-09-07, alex@pingnet.de
+#  - added sync-call at the end of the script.
+# 2006-09-04, alex@pingnet.de
+#  - use "--sparse" when calling rsync(1).
+# 2006-03-04, alex@pingnet.de
+#  - fixed typos ...
+# 2005-10-12, alex@pingnet.de
+#  - initial release.
+
+NAME=`basename $0`
+CONF_D="/etc/backup-script.d"
+VERBOSE=0
+PIDFILE="/var/run/$NAME.pid"
+
+export LC_ALL=C
+
+declare -i count_all=0
+declare -i count_started=0
+declare -i count_ok=0
+declare -i count_ok_vanished=0
+
+destinations=""
+pre_exec=""
+post_exec=""
+
+if [ "$1" == "-p" ]; then
+	VERBOSE=1
+	shift
+fi
+
+if [ $# -gt 1 ]; then
+	echo "Usage: $NAME [-p] [<system>]"
+	exit 1
+fi
+
+Log() {
+	logger -t "$NAME" "$*"
+}
+
+Message() {
+	echo "$*"
+}
+
+MessageLog() {
+	Log "$*"
+	Message "$*"
+}
+
+CleanUp() {
+	if [ -n "$post_exec" ]; then
+		echo "Executing \"$post_exec\" ..."
+		sh -c $post_exec
+		if [ $? -ne 0 ]; then
+			echo "Warning: post-exec command failed!"
+		fi
+		echo
+	fi
+	rm -f "$PIDFILE"
+}
+
+GotSignal() {
+	echo
+	echo "--> Got break signal, cleaning up & aborting ..."
+	echo
+	CleanUp
+	echo -n "Aborted: "; date
+	echo
+	exit 9
+}
+
+if [ $# -ge 1 ]; then
+	sys=${CONF_D}/$1
+	if [ ! -r "$sys" ]; then
+		echo "$NAME: Can' read \"$sys\"!"
+		exit 1
+	fi
+else
+	sys=${CONF_D}/*
+fi
+
+trap GotSignal SIGINT
+
+Log "Started ..."
+
+echo -n "Started: "; date
+echo
+
+[ -r "${CONF_D}/backup-script.conf" ] && source "${CONF_D}/backup-script.conf"
+
+# check and create PID file
+if [ -e "$PIDFILE" ]; then
+	Log "Lockfile \"$PIDFILE\" already exists. Aborting!"
+	echo "Lockfile \"$PIDFILE\" already exists."
+	echo "Is an other instance still running?"
+	echo
+	echo -n "Aborted: "; date
+	echo
+	exit 3
+fi
+touch "$PIDFILE" 2>/dev/null
+if [ $? -ne 0 ]; then
+	echo "Warning: can't create PID file \"$PIDFILE\"!"
+	echo
+else
+	echo "$$" >>"$PIDFILE"
+fi
+
+if [ -n "$pre_exec" ]; then
+	echo "Executing \"$pre_exec\" ..."
+	sh -c $pre_exec
+	if [ $? -ne 0 ]; then
+		echo "Error: pre-exec command failed!"; echo
+		CleanUp
+		echo "Aborting backup."; echo
+		exit 2
+	fi
+	sleep 2
+	echo
+fi
+
+for f in $sys; do
+	[ -r "$f" -a -f "$f" ] || continue
+
+	system=`basename $f`
+	user="root"
+	target=""
+	rsync_args_add=""
+	compress=1
+	local=0
+
+	case "$system" in
+		"backup-script.conf"|*.sh)
+			continue
+			;;
+	esac
+
+	# Read in configuration file
+	source "$f"
+
+	[ "$local" -eq 0 ] \
+		&& MessageLog "Working on \"$system\" ..." \
+		|| MessageLog "Working on \"$system\" (local system) ..."
+
+	count_all=$count_all+1
+
+	# Check target directory
+	if [ -z "$target" ]; then
+		MessageLog "No target directory specified for \"$system\"!? Skipped."
+		echo; continue
+	fi
+	if [ ! -d "$target" ]; then
+		MessageLog "Target \"$target\" is not a directory!? \"$system\" skipped."
+		echo; continue
+	fi
+
+	destdir="$target"
+	target="$target/$system"
+	mkdir -p "$target"
+
+	if [ "$local" -eq 0 ]; then
+		# Check if system is alive
+		ping -c 1 "$system" >/dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			MessageLog "Host \"$system\" seems not to be alive!? Skipped."
+			echo; continue
+		fi
+		Message "OK, host \"$system\" seems to be alive."
+	fi
+
+	cmd="rsync --archive"
+	[ "$compress" -ne 0 ] && cmd="$cmd --compress"
+	cmd="$cmd --rsh=ssh --delete --delete-excluded --sparse"
+	[ "$VERBOSE" -gt 0 ] && cmd="$cmd --progress"
+	cmd="$cmd --exclude=/BACKUP --exclude=/backup --exclude=/mnt"
+	cmd="$cmd --exclude=/dev --exclude=/proc --exclude=/sys"
+	cmd="$cmd --exclude=/usr/src --exclude=/usr/local/src"
+	cmd="$cmd --exclude=/var/cache/apt --exclude=/var/amavis/blocked"
+	cmd="$cmd --exclude=/var/log --exclude=/tmp --exclude=/var/tmp"
+	[ -n "$rsync_args_add" ] && cmd="$cmd $rsync_args_add"
+
+	[ "$local" -eq 0 ] \
+		&& cmd="$cmd ${user}@${system}:/ $target" \
+		|| cmd="$cmd / $target"
+
+	Message "Calling: $cmd"
+	echo -n "Start date: "; date
+	count_started=$count_started+1
+	rm -f "$target/.stamp"
+	
+	$cmd; ret=$?
+	echo "code=$ret" >"$target/.stamp"
+
+	if [ $ret -eq 20 ]; then
+		MessageLog "Backup of \"$system\" interrupted. Aborting ..."
+		CleanUp
+		exit 1
+	fi
+
+	if [ $ret -eq 0 -o $ret -eq 24 ]; then
+		[ $ret -eq 24 ] && count_ok_vanished=$count_ok_vanished+1
+
+		MessageLog "System \"$system\" completed with status $ret, OK."
+		count_ok=$count_ok+1
+	else
+		MessageLog "System \"$system\" completed with ERRORS, code $ret!"
+	fi
+	echo -n "End date: "; date
+
+	destinations="$destinations $destdir"
+	echo
+done
+
+sync
+
+Log "Done: $count_all jobs, $count_started started, $count_ok completed without errors."
+
+paths=$( echo $destinations | sed -e 's/ /\n/g' | sort | uniq )
+if [ -n "$paths" ]; then
+	df -h $paths
+	echo
+fi
+
+CleanUp
+
+echo -n "Done: "; date
+echo
+echo " - $count_all jobs defined,"
+echo " - $count_started jobs started,"
+echo " - $count_ok done without errors."
+echo
+
+if [ $count_started -ne $count_ok ]; then
+	echo "----->  THERE HAVE BEEN ERRORS!  <-----"
+	echo
+fi
+
+# -eof-

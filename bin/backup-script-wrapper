@@ -1,0 +1,15 @@
+#!/bin/sh
+
+MAILTO="logcheck"
+
+NAME="backup-script"
+HOST=`hostname`
+TMP="/tmp/$NAME.$$"
+
+backup-script $* >$TMP 2>&1
+
+cat $TMP | mail -s "$HOST: $NAME results" "$MAILTO"
+
+rm -f $TMP
+
+# -eof-
