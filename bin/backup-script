@@ -31,10 +31,12 @@ if [ "$1" == "-p" ]; then
 	shift
 fi
 
-if [ $# -gt 1 ]; then
-	echo "Usage: $NAME [-p] [<system>]"
+case "$1" in
+    "-"*)
+	echo "Usage: $NAME [-p] [<system> [<system> [...]]]"
 	exit 1
-fi
+	;;
+esac
 
 Log() {
 	logger -t "$NAME" "$*"
@@ -72,11 +74,13 @@ GotSignal() {
 }
 
 if [ $# -ge 1 ]; then
-	sys=${CONF_D}/$1
-	if [ ! -r "$sys" ]; then
-		echo "$NAME: Can' read \"$sys\"!"
-		exit 1
-	fi
+	for s in $@; do
+		if [ ! -r "${CONF_D}/$s" ]; then
+			echo "$NAME: Can' read \"${CONF_D}/$s\"!"
+			exit 1
+		fi
+		sys="$sys ${CONF_D}/$s"
+	done
 else
 	sys=${CONF_D}/*
 fi
