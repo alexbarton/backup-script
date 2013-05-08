@@ -1,0 +1,95 @@
+#!/bin/sh
+#
+# backup-script system for cloning systems using rsync
+# Copyright (c)2008-2013 Alexander Barton, alex@barton.de
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Please read the file COPYING, README and AUTHORS for more information.
+#
+
+NAME=`basename $0`
+CONF_D="/etc/backup-script.d"
+QUICK=0
+
+export LC_ALL=C
+
+declare -i count=0
+
+default_target=""
+default_user="root"
+
+if [ "$1" == "-q" ]; then
+	QUICK=1
+	shift
+fi
+
+case "$1" in
+    "-"*)
+	echo "Usage: $NAME [-p] [<system> [<system> [...]]]"
+	exit 1
+	;;
+esac
+
+if [ $# -ge 1 ]; then
+	for s in $@; do
+		if [ ! -r "${CONF_D}/$s" ]; then
+			echo "$NAME: Can' read \"${CONF_D}/$s\"!"
+			exit 1
+		fi
+		sys="$sys ${CONF_D}/$s"
+	done
+else
+	sys=${CONF_D}/*
+fi
+
+[ -r "${CONF_D}/backup-script.conf" ] && source "${CONF_D}/backup-script.conf"
+
+for f in $sys; do
+	[ -r "$f" -a -f "$f" ] || continue
+
+	system=`basename $f`
+	target="$default_target"
+
+	case "$system" in
+		"backup-script.conf"|*.sh)
+			continue
+			;;
+	esac
+
+	# Read in configuration file
+	source "$f"
+
+	destdir="$target"
+	target="$target/$system"
+
+	[ -d "$target" ] || continue
+
+	echo "-- $system -- "
+	echo "Storage: $target"
+	if [ "$QUICK" = "0" ]; then
+		size=$( du -sh "$target" | cut -f1 )
+		echo "Size: $size"
+	fi
+	if [ -f "$target/.stamp" ]; then
+		stat "$target/.stamp" | grep "^Modify: " | cut -d. -f1
+		unset code
+		source "$target/.stamp"
+		[ -n "$code" ] && echo "Result code: $code"
+	else
+		echo "No timestamp recorded!?"
+	fi
+
+	count=$count+1
+	echo
+done
+
+if [ $count -lt 1 ]; then
+	echo "No backups found!"
+	exit 1
+fi
+echo "$count system backups found."
+
+# -eof-
