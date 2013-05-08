@@ -67,19 +67,20 @@ for f in $sys; do
 
 	[ -d "$target" ] || continue
 
-	echo "-- $system -- "
-	echo "Storage: $target"
+	echo "$system"
+	echo "- Target: $target"
 	if [ "$QUICK" = "0" ]; then
-		size=$( du -sh "$target" | cut -f1 )
-		echo "Size: $size"
+		size=`du -sh "$target" | cut -f1`
+		echo "- Size:" $size
 	fi
 	if [ -f "$target/.stamp" ]; then
-		stat "$target/.stamp" | grep "^Modify: " | cut -d. -f1
+		last=`stat "$target/.stamp" | grep "^Modify: " | cut -d':' -f2- | cut -d. -f1`
+		[ -n "$last" ] && echo "- Date:" $last
 		unset code
 		source "$target/.stamp"
-		[ -n "$code" ] && echo "Result code: $code"
+		[ -n "$code" ] && echo "- Result code:" $code
 	else
-		echo "No timestamp recorded!?"
+		echo "- No timestamp recorded!?"
 	fi
 
 	count=$count+1
@@ -90,6 +91,6 @@ if [ $count -lt 1 ]; then
 	echo "No backups found!"
 	exit 1
 fi
-echo "$count system backups found."
+echo "$count system backup(s) found."
 
 # -eof-
