@@ -25,6 +25,8 @@ declare -i count_ok_vanished=0
 destinations=""
 pre_exec=""
 post_exec=""
+default_target=""
+default_user="root"
 
 if [ "$1" == "-p" ]; then
 	VERBOSE=1
@@ -129,8 +131,8 @@ for f in $sys; do
 	[ -r "$f" -a -f "$f" ] || continue
 
 	system=`basename $f`
-	user="root"
-	target=""
+	user="$default_user"
+	target="$default_target"
 	ssh_args_add=""
 	rsync_args_add=""
 	compress=1
