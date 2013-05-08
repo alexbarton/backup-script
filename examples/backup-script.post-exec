@@ -1,0 +1,11 @@
+#!/bin/sh
+
+MOUNTPOINT="/backup"
+
+echo -n "mounting $MOUNTPOINT read-only ... "
+mount -o remount,ro $MOUNTPOINT 2>/dev/null
+[ $? -eq 0 ] && echo "ok." || echo "failed!"
+
+exit 0
+
+# -eof-

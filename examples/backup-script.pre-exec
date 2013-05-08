@@ -1,0 +1,18 @@
+#!/bin/sh
+
+MOUNTPOINT="/backup"
+
+echo -n "mounting $MOUNTPOINT read-write ... "
+mount | grep " $MOUNTPOINT " >/dev/null 2>&1
+[ $? -eq 0 ] \
+	&& mount -o remount,rw,noatime $MOUNTPOINT \
+	|| mount -o rw,noatime $MOUNTPOINT
+if [ $? -eq 0 ]; then
+	echo "ok."
+	exit 0
+else
+	echo "failed!"
+	exit 1
+fi
+
+# -eof-
