@@ -25,10 +25,17 @@ declare -i count_ok=0
 declare -i count_ok_vanished=0
 
 destinations=""
+
+# Default settings, can be overwritten in backup-script.conf:
 pre_exec=""
 post_exec=""
 default_target=""
 default_user="root"
+default_ssh_args_add=""
+default_rsync_args_add=""
+default_compress=1
+default_ping=1
+default_local=0
 
 Usage() {
 	echo "Usage: $NAME [<options>] [<system> [<system> [...]]]"
@@ -148,21 +155,22 @@ for f in $sys; do
 	[ -r "$f" -a -f "$f" ] || continue
 
 	system=`basename $f`
-	user="$default_user"
-	target="$default_target"
-	ssh_args_add=""
-	rsync_args_add=""
-	compress=1
-	ping=1
-	local=0
-
 	case "$system" in
 		"backup-script.conf"|*.sh)
 			continue
 			;;
 	esac
 
-	# Read in configuration file
+	# Set global defaults
+	user="$default_user"
+	target="$default_target"
+	ssh_args_add="$default_ssh_args_add"
+	rsync_args_add="$default_rsync_args_add"
+	compress="$default_compress"
+	ping="$default_ping"
+	local="$default_local"
+
+	# Read in system configuration file
 	source "$f"
 
 	[ "$local" -eq 0 ] \
