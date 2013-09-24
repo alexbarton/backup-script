@@ -156,11 +156,11 @@ for f in $sys; do
 
 	# Check target directory
 	if [ -z "$target" ]; then
-		MessageLog "No target directory specified for \"$system\"!? Skipped."
+		MessageLog "No target directory specified for \"$system\"!? Skipped!"
 		echo; continue
 	fi
 	if [ ! -d "$target" ]; then
-		MessageLog "Target \"$target\" is not a directory!? \"$system\" skipped."
+		MessageLog "Target \"$target\" is not a directory!? \"$system\" skipped!"
 		echo; continue
 	fi
 
