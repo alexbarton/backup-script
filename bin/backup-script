@@ -12,8 +12,10 @@
 
 NAME=`basename $0`
 CONF_D="/etc/backup-script.d"
-VERBOSE=0
 PIDFILE="/var/run/$NAME.pid"
+
+DRYRUN=0
+VERBOSE=0
 
 export LC_ALL=C
 
@@ -28,17 +30,16 @@ post_exec=""
 default_target=""
 default_user="root"
 
-if [ "$1" == "-p" -o "$1" == "--progress" ]; then
-	VERBOSE=1
-	shift
-fi
-
-case "$1" in
-    "-"*)
-	echo "Usage: $NAME [-p|--preogress] [<system> [<system> [...]]]"
+Usage() {
+	echo "Usage: $NAME [<options>] [<system> [<system> [...]]]"
+	echo
+	echo "  -p, --progress    Show progress, see rsync(1)."
+	echo "  -d, --dry-run     Test run only, don't copy any data."
+	echo
+	echo "When no <system> is given, all defined systems are used."
+	echo
 	exit 1
-	;;
-esac
+}
 
 Log() {
 	logger -t "$NAME" "$*"
@@ -74,6 +75,22 @@ GotSignal() {
 	echo
 	exit 9
 }
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+	  "-n"|"--dry-run")
+		DRYRUN=1; shift
+		;;
+	  "-p"|"--progress")
+		VERBOSE=1; shift
+		;;
+	  "-"*)
+		Usage
+		;;
+	  *)
+		break
+	esac
+done
 
 if [ $# -ge 1 ]; then
 	for s in $@; do
@@ -166,7 +183,7 @@ for f in $sys; do
 
 	destdir="$target"
 	target="$target/$system"
-	mkdir -p "$target"
+	[ "$DRYRUN" -gt 1 ] || mkdir -p "$target"
 
 	if [ "$local" -eq 0 -a "$ping" -ne 0 ]; then
 		# Check if system is alive
@@ -201,8 +218,13 @@ for f in $sys; do
 	count_started=$count_started+1
 	rm -f "$target/.stamp"
 	
-	$SHELL -c "$cmd"; ret=$?
-	echo "code=$ret" >"$target/.stamp"
+	if [ "$DRYRUN" -lt 1 ]; then
+		$SHELL -c "$cmd"; ret=$?
+		echo "code=$ret" >"$target/.stamp"
+	else
+		MessageLog " *** Trial run, not executing synchronization command!"
+		ret=0
+	fi
 
 	if [ $ret -eq 20 ]; then
 		MessageLog "Backup of \"$system\" interrupted. Aborting ..."
@@ -214,7 +236,7 @@ for f in $sys; do
 		[ $ret -eq 24 ] && count_ok_vanished=$count_ok_vanished+1
 
 		MessageLog "System \"$system\" completed with status $ret, OK."
-		count_ok=$count_ok+1
+		[ "$DRYRUN" -gt 0 ] || count_ok=$count_ok+1
 	else
 		MessageLog "System \"$system\" completed with ERRORS, code $ret!"
 	fi
