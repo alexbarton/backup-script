@@ -33,6 +33,7 @@ default_target=""
 default_user="root"
 default_ssh_args_add=""
 default_rsync_args_add=""
+default_exclude_args_add=""
 default_compress=1
 default_ping=1
 default_local=0
@@ -166,6 +167,7 @@ for f in $sys; do
 	target="$default_target"
 	ssh_args_add="$default_ssh_args_add"
 	rsync_args_add="$default_rsync_args_add"
+	exclude_args_add="$default_exclude_args_add"
 	compress="$default_compress"
 	ping="$default_ping"
 	local="$default_local"
@@ -210,11 +212,11 @@ for f in $sys; do
 	[ "$compress" -ne 0 ] && cmd="$cmd --compress"
 	cmd="$cmd --rsh=\"$ssh_cmd\" --delete --delete-excluded --sparse"
 	[ "$VERBOSE" -gt 0 ] && cmd="$cmd --progress"
-	cmd="$cmd --exclude=/BACKUP --exclude=/backup --exclude=/mnt"
 	cmd="$cmd --exclude=/dev --exclude=/proc --exclude=/sys"
-	cmd="$cmd --exclude=/usr/src --exclude=/usr/local/src"
-	cmd="$cmd --exclude=/var/cache/apt --exclude=/var/amavis/blocked"
-	cmd="$cmd --exclude=/var/log --exclude=/tmp --exclude=/var/tmp"
+	cmd="$cmd --exclude=/tmp --exclude=/var/tmp"
+	cmd="$cmd --exclude=/media --exclude=/mnt --exclude=/net"
+	cmd="$cmd --exclude=/var/cache/apt --exclude=/var/log"
+	[ -n "$exclude_args_add" ] && cmd="$cmd $exclude_args_add"
 	[ -n "$rsync_args_add" ] && cmd="$cmd $rsync_args_add"
 
 	[ "$local" -eq 0 ] \
