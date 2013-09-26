@@ -178,9 +178,14 @@ for f in $sys; do
 		echo; continue
 	fi
 
-	destdir="$target"
-	target="$target/$system"
-	[ "$DRYRUN" -gt 1 ] || mkdir -p "$target"
+	sys_target="$target/$system"
+	if [ "$DRYRUN" -eq 0 ]; then
+		mkdir -p "$sys_target" >/dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			echo "Can't create \"$sys_target\"!? \"$system\" skipped!"
+			echo continue
+		fi
+	fi
 
 	if [ "$local" -eq 0 -a "$ping" -ne 0 ]; then
 		# Check if system is alive
@@ -207,17 +212,17 @@ for f in $sys; do
 	[ -n "$rsync_args_add" ] && cmd="$cmd $rsync_args_add"
 
 	[ "$local" -eq 0 ] \
-		&& cmd="$cmd ${user}@${system}:/ $target" \
-		|| cmd="$cmd / $target"
+		&& cmd="$cmd ${user}@${system}:/ $sys_target/" \
+		|| cmd="$cmd / $sys_target/"
 
 	echo "Calling: $cmd"
 	echo -n "Start date: "; date
 	count_started=$count_started+1
-	rm -f "$target/.stamp"
+	rm -f "$sys_target/.stamp"
 	
-	if [ "$DRYRUN" -lt 1 ]; then
+	if [ "$DRYRUN" -eq 0 ]; then
 		$SHELL -c "$cmd"; ret=$?
-		echo "code=$ret" >"$target/.stamp"
+		echo "code=$ret" >"$sys_target/.stamp"
 	else
 		echo " *** Trial run, not executing synchronization command!"
 		ret=0
@@ -239,7 +244,7 @@ for f in $sys; do
 	fi
 	echo -n "End date: "; date
 
-	destinations="$destinations $destdir"
+	destinations="$destinations $target"
 	echo
 done
 
