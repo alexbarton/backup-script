@@ -101,8 +101,6 @@ fi
 
 trap GotSignal SIGINT
 
-Log "Started ..."
-
 echo -n "Started: "; date
 echo
 
@@ -110,7 +108,6 @@ echo
 
 # check and create PID file
 if [ -e "$PIDFILE" ]; then
-	Log "Lockfile \"$PIDFILE\" already exists. Aborting!"
 	echo "Lockfile \"$PIDFILE\" already exists."
 	echo "Is an other instance still running?"
 	echo
@@ -249,8 +246,6 @@ for f in $sys; do
 done
 
 sync
-
-Log "Done: $count_all jobs, $count_started started, $count_ok completed without errors."
 
 paths=$( echo $destinations | sed -e 's/ /\n/g' | sort | uniq )
 if [ -n "$paths" ]; then
