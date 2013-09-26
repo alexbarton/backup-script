@@ -139,14 +139,15 @@ fi
 for f in $sys; do
 	[ -r "$f" -a -f "$f" ] || continue
 
-	system=`basename $f`
-	case "$system" in
+	fname=`basename $f`
+	case "$fname" in
 		"backup-script.conf"|*.sh)
 			continue
 			;;
 	esac
 
 	# Set global defaults
+	system="$fname"
 	user="$default_user"
 	target="$default_target"
 	ssh_args_add="$default_ssh_args_add"
@@ -159,9 +160,12 @@ for f in $sys; do
 	# Read in system configuration file
 	source "$f"
 
+	[ "$system" = "$fname" ] \
+		&& systxt="\"$system\"" \
+		|| systxt="\"$fname\" [\"$system\"]"
 	[ "$local" -eq 0 ] \
-		&& echo "Working on \"$system\" ..." \
-		|| echo "Working on \"$system\" (local system) ..."
+		&& echo "Working on $systxt ..." \
+		|| echo "Working on $sytxts (local system) ..."
 
 	count_all=$count_all+1
 
