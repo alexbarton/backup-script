@@ -248,7 +248,7 @@ done
 sync
 
 paths=$( echo $destinations | sed -e 's/ /\n/g' | sort | uniq )
-if [ -n "$paths" ]; then
+if [ "$DRYRUN" -eq 0 -a -n "$paths" ]; then
 	df -h $paths
 	echo
 fi
