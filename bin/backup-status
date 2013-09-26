@@ -17,9 +17,42 @@ QUICK=0
 export LC_ALL=C
 
 declare -i count=0
+declare -i snapshots=0
 
 # Default settings, can be overwritten in backup-script.conf:
 default_target=""
+default_generations=0
+
+Check_Size() {
+	# $1: directory
+	# $2: padding
+
+	if [ "$QUICK" = "0" ]; then
+		size=`du -sh "$1" | cut -f1`
+		echo "$2  - Size:" $size
+	fi
+}
+
+Check_Stamp() {
+	# $1: stamp file
+	# $2: padding
+
+	if [ -f "$1" ]; then
+		last=`stat "$1" | grep "^Modify: " \
+		  | cut -d':' -f2- | cut -d. -f1`
+		[ -n "$last" ] && echo "$2  - Date:" $last
+		unset code
+		source "$1"
+		case "$code" in
+		  0)	txt=", OK"; ;;
+		  24)	txt=", files changed during backup"; ;;
+		  *)	txt=""
+		esac
+		[ -n "$code" ] && echo "$2  - Result code: $code$txt"
+	else
+		echo "$2  - No timestamp recorded!? Backup aborted?"
+	fi
+}
 
 if [ "$1" == "-q" ]; then
 	QUICK=1
@@ -60,6 +93,7 @@ for f in $sys; do
 	# Set global defaults
 	system="$fname"
 	target="$default_target"
+	generations="$default_generations"
 
 	# Read in system configuration file
 	source "$f"
@@ -73,24 +107,23 @@ for f in $sys; do
 	[ -d "$target" ] || continue
 
 	# System name
-	[ "$system" = "$fname" ] && echo "$system" || echo "$system [$fname]"
+	[ "$system" = "$fname" ] && echo "$fname" || echo "$fname [$system]"
 
 	# System target directory
 	echo "- Target: $target"
-	if [ "$QUICK" = "0" ]; then
-		size=`du -sh "$target" | cut -f1`
-		echo "- Size:" $size
-	fi
 
-	# Timestamp and result code
-	if [ -f "$target/.stamp" ]; then
-		last=`stat "$target/.stamp" | grep "^Modify: " | cut -d':' -f2- | cut -d. -f1`
-		[ -n "$last" ] && echo "- Date:" $last
-		unset code
-		source "$target/.stamp"
-		[ -n "$code" ] && echo "- Result code:" $code
+	if [ $generations -gt 0 ]; then
+		for s in $target/[0-9]*-[0-9]*; do
+			echo "  - Snapshot: $s"
+			Check_Size "$s" "  "
+			Check_Stamp "$s/.stamp" "  "
+			snapshots=$snapshots+1
+		done
 	else
-		echo "- No timestamp recorded!?"
+		# Timestamp and result code
+		Check_Size "$s"
+		Check_Stamp "$target/.stamp"
+		snapshots=$snapshots+1
 	fi
 
 	count=$count+1
@@ -101,6 +134,8 @@ if [ $count -lt 1 ]; then
 	echo "No backups found!"
 	exit 1
 fi
-echo "$count system backup(s) found."
+[ $count -eq 1 ] && sc="" || sc="s"
+[ $snapshots -eq 1 ] && ss="" || ss="s"
+echo "$count system backup$sc found, $snapshots snapshot$ss."
 
 # -eof-

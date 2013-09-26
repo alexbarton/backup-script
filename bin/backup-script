@@ -37,6 +37,7 @@ default_exclude_args_add=""
 default_compress=1
 default_ping=1
 default_local=0
+default_generations=0
 
 Usage() {
 	echo "Usage: $NAME [<options>] [<system> [<system> [...]]]"
@@ -156,6 +157,7 @@ for f in $sys; do
 	compress="$default_compress"
 	ping="$default_ping"
 	local="$default_local"
+	generations="$default_generations"
 
 	# Read in system configuration file
 	source "$f"
@@ -199,6 +201,64 @@ for f in $sys; do
 			echo; continue
 		fi
 		echo "OK, host \"$system\" seems to be alive."
+	fi
+
+	if [ $generations -gt 0 ]; then
+		# Make sure no old backup is stored in system directory
+		if [ -e "$sys_target/.stamp" ]; then
+			# There seems to be a genearation-less backup in the
+			# target directory!
+			echo "Target directory \"$sys_target\" seems to be unclean!? \"$system\" skipped!"
+			echo; continue
+		fi
+
+		# Search directory of last generation, if any
+		last="`ls -1 "$sys_target" 2>/dev/null | sort -r | head -n1`"
+		if [ -n "$last" ]; then
+			last="$sys_target/$last"
+			if [ ! -d "$last" ]; then
+				echo "Last snapshot \"$last\" seems not to be a directory!? \"$system\" skipped!"
+				echo; continue
+			fi
+		fi
+		sys_target="$sys_target/`date +%Y%m%d-%H%M%S`"
+
+		if [ -n "$last" -a ! -e "$last/.stamp" ]; then
+			# Old backup directory without "stamp file", continue
+			echo "Found incomplete snapshot in \"$last\", reusing and renaming it ..."
+			mv "$last" "$sys_target" >/dev/null 2>&1
+			if [ $? -ne 0 ]; then
+				echo "Failed to rename last snapshot \"$last\" to \"$sys_target\"!? \"$system\" skipped!"
+				echo; continue
+			fi
+		elif [ -n "$last" ]; then
+			# Old backup directory found, create new snapshot
+			echo "Found last snapshot in \"$last\"."
+			if [ "$DRYRUN" -eq 0 ]; then
+				btrfs subvolume snapshot \
+				  "$last" "$sys_target" >/dev/null 2>&1; r=$?
+				if [ $r -ne 0 ]; then
+					echo "Can't create btrfs snapshot \"$sys_target\" of \"$last\", code $r!? \"$system\" skipped!"
+					echo; continue
+				fi
+				echo "Created new snapshot in \"$sys_target\"."
+			else
+				echo " *** Trial run, not creating new snapshot in \"$sys_target\"!"
+			fi
+		else
+			# No old backup found, create new subvolume
+			if [ "$DRYRUN" -eq 0 ]; then
+				btrfs subvolume create \
+				  "$sys_target" >/dev/null 2>&1; r=$?
+				if [ $r -ne 0 ]; then
+					echo "Can't create btrfs subvolume \"$sys_target\", code $r!? \"$system\" skipped!"
+					echo; continue
+				fi
+				echo "Created new subvolume in \"$sys_target\"."
+			else
+				echo " *** Trial run, not creating new subvolume \"$sys_target\"!"
+			fi
+		fi
 	fi
 
 	ssh_cmd="ssh"
