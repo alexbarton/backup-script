@@ -184,7 +184,7 @@ for f in $sys; do
 		echo; continue
 	fi
 
-	sys_target="$target/$system"
+	sys_target="$target/$fname"
 	if [ "$DRYRUN" -eq 0 ]; then
 		mkdir -p "$sys_target" >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
