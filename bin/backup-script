@@ -49,19 +49,6 @@ Usage() {
 	exit 1
 }
 
-Log() {
-	logger -t "$NAME" "$*"
-}
-
-Message() {
-	echo "$*"
-}
-
-MessageLog() {
-	Log "$*"
-	Message "$*"
-}
-
 CleanUp() {
 	if [ -n "$post_exec" ]; then
 		echo "Executing \"$post_exec\" ..."
@@ -176,18 +163,18 @@ for f in $sys; do
 	source "$f"
 
 	[ "$local" -eq 0 ] \
-		&& MessageLog "Working on \"$system\" ..." \
-		|| MessageLog "Working on \"$system\" (local system) ..."
+		&& echo "Working on \"$system\" ..." \
+		|| echo "Working on \"$system\" (local system) ..."
 
 	count_all=$count_all+1
 
 	# Check target directory
 	if [ -z "$target" ]; then
-		MessageLog "No target directory specified for \"$system\"!? Skipped!"
+		echo "No target directory specified for \"$system\"!? Skipped!"
 		echo; continue
 	fi
 	if [ ! -d "$target" ]; then
-		MessageLog "Target \"$target\" is not a directory!? \"$system\" skipped!"
+		echo "Target \"$target\" is not a directory!? \"$system\" skipped!"
 		echo; continue
 	fi
 
@@ -199,10 +186,10 @@ for f in $sys; do
 		# Check if system is alive
 		ping -c 1 "$system" >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
-			MessageLog "Host \"$system\" seems not to be alive!? Skipped."
+			echo "Host \"$system\" seems not to be alive!? Skipped."
 			echo; continue
 		fi
-		Message "OK, host \"$system\" seems to be alive."
+		echo "OK, host \"$system\" seems to be alive."
 	fi
 
 	ssh_cmd="ssh"
@@ -223,7 +210,7 @@ for f in $sys; do
 		&& cmd="$cmd ${user}@${system}:/ $target" \
 		|| cmd="$cmd / $target"
 
-	Message "Calling: $cmd"
+	echo "Calling: $cmd"
 	echo -n "Start date: "; date
 	count_started=$count_started+1
 	rm -f "$target/.stamp"
@@ -232,12 +219,12 @@ for f in $sys; do
 		$SHELL -c "$cmd"; ret=$?
 		echo "code=$ret" >"$target/.stamp"
 	else
-		MessageLog " *** Trial run, not executing synchronization command!"
+		echo " *** Trial run, not executing synchronization command!"
 		ret=0
 	fi
 
 	if [ $ret -eq 20 ]; then
-		MessageLog "Backup of \"$system\" interrupted. Aborting ..."
+		echo "Backup of \"$system\" interrupted. Aborting ..."
 		CleanUp
 		exit 1
 	fi
@@ -245,10 +232,10 @@ for f in $sys; do
 	if [ $ret -eq 0 -o $ret -eq 24 ]; then
 		[ $ret -eq 24 ] && count_ok_vanished=$count_ok_vanished+1
 
-		MessageLog "System \"$system\" completed with status $ret, OK."
+		echo "System \"$system\" completed with status $ret, OK."
 		[ "$DRYRUN" -gt 0 ] || count_ok=$count_ok+1
 	else
-		MessageLog "System \"$system\" completed with ERRORS, code $ret!"
+		echo "System \"$system\" completed with ERRORS, code $ret!"
 	fi
 	echo -n "End date: "; date
 
