@@ -212,8 +212,9 @@ for f in $sys; do
 		&& cmd="$cmd ${user}@${system}:/ $sys_target/" \
 		|| cmd="$cmd / $sys_target/"
 
-	echo "Calling: $cmd"
+	echo "Backing up to \"$sys_target\" ..."
 	echo -n "Start date: "; date
+	echo "$cmd"
 	count_started=$count_started+1
 	rm -f "$sys_target/.stamp"
 	
@@ -231,6 +232,7 @@ for f in $sys; do
 		exit 1
 	fi
 
+	echo -n "End date: "; date
 	if [ $ret -eq 0 -o $ret -eq 24 ]; then
 		[ $ret -eq 24 ] && count_ok_vanished=$count_ok_vanished+1
 
@@ -239,7 +241,6 @@ for f in $sys; do
 	else
 		echo "System \"$system\" completed with ERRORS, code $ret!"
 	fi
-	echo -n "End date: "; date
 
 	destinations="$destinations $target"
 	echo
@@ -257,8 +258,10 @@ CleanUp
 
 echo -n "Done: "; date
 echo
-echo " - $count_all jobs defined,"
-echo " - $count_started jobs started,"
+[ $count_all -eq 1 ] && s="" || s="s"
+echo " - $count_all job$s defined,"
+[ $count_started -eq 1 ] && s="" || s="s"
+echo " - $count_started job$s started,"
 echo " - $count_ok done without errors."
 echo
 
