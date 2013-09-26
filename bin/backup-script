@@ -160,6 +160,9 @@ for f in $sys; do
 	# Read in system configuration file
 	source "$f"
 
+	# Validate configuration
+	[ "$system" = "localhost" -o "$system" = "127.0.0.1" ] && local=1
+
 	[ "$system" = "$fname" ] \
 		&& systxt="\"$system\"" \
 		|| systxt="\"$fname\" [\"$system\"]"

@@ -18,8 +18,8 @@ export LC_ALL=C
 
 declare -i count=0
 
+# Default settings, can be overwritten in backup-script.conf:
 default_target=""
-default_user="root"
 
 if [ "$1" == "-q" ]; then
 	QUICK=1
@@ -50,29 +50,39 @@ fi
 for f in $sys; do
 	[ -r "$f" -a -f "$f" ] || continue
 
-	system=`basename $f`
-	target="$default_target"
-
-	case "$system" in
+	fname=`basename $f`
+	case "$fname" in
 		"backup-script.conf"|*.sh)
 			continue
 			;;
 	esac
 
-	# Read in configuration file
+	# Set global defaults
+	system="$fname"
+	target="$default_target"
+
+	# Read in system configuration file
 	source "$f"
+
+	# Validate configuration
+	[ "$system" = "localhost" -o "$system" = "127.0.0.1" ] && local=1
 
 	destdir="$target"
 	target="$target/$system"
 
 	[ -d "$target" ] || continue
 
-	echo "$system"
+	# System name
+	[ "$system" = "$fname" ] && echo "$system" || echo "$system [$fname]"
+
+	# System target directory
 	echo "- Target: $target"
 	if [ "$QUICK" = "0" ]; then
 		size=`du -sh "$target" | cut -f1`
 		echo "- Size:" $size
 	fi
+
+	# Timestamp and result code
 	if [ -f "$target/.stamp" ]; then
 		last=`stat "$target/.stamp" | grep "^Modify: " | cut -d':' -f2- | cut -d. -f1`
 		[ -n "$last" ] && echo "- Date:" $last
