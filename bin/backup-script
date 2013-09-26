@@ -216,9 +216,9 @@ for f in $sys; do
 	echo -n "Start date: "; date
 	echo "$cmd"
 	count_started=$count_started+1
-	rm -f "$sys_target/.stamp"
 	
 	if [ "$DRYRUN" -eq 0 ]; then
+		rm -f "$sys_target/.stamp"
 		$SHELL -c "$cmd"; ret=$?
 		echo "code=$ret" >"$sys_target/.stamp"
 	else
