@@ -45,8 +45,8 @@ Check_Stamp() {
 		source "$1"
 		case "$code" in
 		  0)	txt=", OK"; ;;
-		  24)	txt=", files changed during backup"; ;;
-		  *)	txt=""
+		  24)	txt=", WARNING (some files vanished during backup)"; ;;
+		  *)	txt=", ERROR"
 		esac
 		[ -n "$code" ] && echo "$2  - Result code: $code$txt"
 	else
