@@ -19,6 +19,13 @@ TMP="/tmp/$NAME.$$"
 PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 export PATH
 
+echo "$NAME Report" >$TMP
+echo >>$TMP
+echo " - Host: `hostname -f`" >>$TMP
+echo " - User: `id -un`" >>$TMP
+echo >>$TMP
+
+
 `dirname "$0"`/backup-script $* >>$TMP 2>&1
 
 cat $TMP | mail -s "$HOST: $NAME results" "$MAILTO"
