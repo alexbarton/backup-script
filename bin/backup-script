@@ -43,7 +43,7 @@ Usage() {
 	echo "Usage: $NAME [<options>] [<system> [<system> [...]]]"
 	echo
 	echo "  -p, --progress    Show progress, see rsync(1)."
-	echo "  -d, --dry-run     Test run only, don't copy any data."
+	echo "  -n, --dry-run     Test run only, don't copy any data."
 	echo
 	echo "When no <system> is given, all defined systems are used."
 	echo
