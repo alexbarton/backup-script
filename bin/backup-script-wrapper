@@ -10,7 +10,7 @@
 # Please read the file COPYING, README and AUTHORS for more information.
 #
 
-MAILTO="logcheck"
+[ -n "$MAILTO" ] || MAILTO="logcheck"
 
 NAME="backup-script"
 HOST=`hostname`
@@ -24,7 +24,6 @@ echo >>$TMP
 echo " - Host: `hostname -f`" >>$TMP
 echo " - User: `id -un`" >>$TMP
 echo >>$TMP
-
 
 `dirname "$0"`/backup-script $* >>$TMP 2>&1
 
