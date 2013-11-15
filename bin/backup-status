@@ -61,7 +61,7 @@ fi
 
 case "$1" in
     "-"*)
-	echo "Usage: $NAME [-p] [<system> [<system> [...]]]"
+	echo "Usage: $NAME [-q] [<system> [<system> [...]]]"
 	exit 1
 	;;
 esac
