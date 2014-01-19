@@ -283,6 +283,7 @@ for f in $sys; do
 	echo -n "Start date: "; date
 	echo "$cmd"
 	count_started=$count_started+1
+	ok=0
 	
 	if [ "$DRYRUN" -eq 0 ]; then
 		rm -f "$sys_target/.stamp"
@@ -305,8 +306,41 @@ for f in $sys; do
 
 		echo "System \"$system\" completed with status $ret, OK."
 		[ "$DRYRUN" -gt 0 ] || count_ok=$count_ok+1
+		ok=1
 	else
 		echo "System \"$system\" completed with ERRORS, code $ret!"
+	fi
+
+	# Clean up old generations
+	if [ $generations -gt 0 ]; then
+		sys_target="$target/$fname"
+		to_delete=`ls -1t "$sys_target" 2>/dev/null | tail -n+$generations | sort`
+		if [ -n "$to_delete" -a $ok -eq 1 ]; then
+			[ "$DRYRUN" -eq 0 ] \
+				&& echo "Deleting old backup generations:" \
+				|| echo " *** Trial run, not deleting old generations:"
+			for delete in $to_delete; do
+				dir="$sys_target/$delete"
+				if [ ! -e "$dir/.stamp" ]; then
+					echo "Not deleting \"$dir\", not a backup directory!?"
+					continue
+				fi
+				last=`stat "$dir/.stamp" 2>/dev/null | grep "^Modify: " \
+				 | cut -d':' -f2- | cut -d. -f1`
+				echo "Removing backup from" $last "..."
+				if [ "$DRYRUN" -eq 0 ]; then
+					btrfs subvolume delete \
+					 "$dir" >/dev/null 2>&1
+					[ $? -eq 0 ] || \
+					 echo "Failed to delete \"$dir\"!"
+				fi
+			done
+			echo -n "Clean up finished: "; date
+		elif [ -n "$to_delete" ]; then
+			echo "There have been errors, not cleaning up old generations!"
+		else
+			echo "Nothing to clean up."
+		fi
 	fi
 
 	destinations="$destinations $target"
