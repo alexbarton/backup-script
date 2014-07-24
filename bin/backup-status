@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # backup-script system for cloning systems using rsync
-# Copyright (c)2008-2013 Alexander Barton, alex@barton.de
+# Copyright (c)2008-2014 Alexander Barton, alex@barton.de
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ Check_Stamp() {
 		esac
 		[ -n "$code" ] && echo "$2  - Result code: $code$txt"
 	else
-		echo "$2  - No timestamp recorded!? Backup aborted?"
+		echo "$2  - No timestamp recorded! Backup currently running or aborted?"
 	fi
 }
 
