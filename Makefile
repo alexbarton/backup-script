@@ -16,7 +16,3 @@ install-local:
 	 $(DESTDIR)$(PREFIX)/sbin/backup-status
 	install -d -o $(USER) -g $(GROUP) -m 755 \
 	 $(DESTDIR)$(PREFIX)/etc/backup-script.d
-	install -d -o $(USER) -g $(GROUP) -m 755 $(DESTDIR)/etc
-	test -e $(DESTDIR)/etc/backup-script.d \
-	 || ln -s $(DESTDIR)$(PREFIX)/etc/backup-script.d \
-	      $(DESTDIR)/etc/backup-script.d
