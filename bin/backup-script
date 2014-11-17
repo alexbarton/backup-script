@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # backup-script system for cloning systems using rsync
-# Copyright (c)2008-2013 Alexander Barton, alex@barton.de
+# Copyright (c)2008-2014 Alexander Barton, alex@barton.de
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,9 +103,14 @@ fi
 trap GotSignal SIGINT
 
 echo -n "Started: "; date
-echo
 
-[ -r "${CONF_D}/backup-script.conf" ] && source "${CONF_D}/backup-script.conf"
+for conf in "/etc/backup-script.conf" "${CONF_D}/backup-script.conf"; do
+	if [ -r "$conf" ]; then
+		echo "Reading configuration: \"$conf\" ..."
+		source "$conf"
+	fi
+done
+echo
 
 # check and create PID file
 if [ -e "$PIDFILE" ]; then
