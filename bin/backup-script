@@ -11,7 +11,6 @@
 #
 
 NAME=`basename $0`
-CONF_D="/etc/backup-script.d"
 PIDFILE="/var/run/$NAME.pid"
 
 DRYRUN=0
@@ -27,6 +26,7 @@ declare -i count_ok_vanished=0
 destinations=""
 
 # Default settings, can be overwritten in backup-script.conf:
+conf_d="/etc/backup-script.d"
 pre_exec=""
 post_exec=""
 default_target=""
@@ -88,29 +88,29 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
-if [ $# -ge 1 ]; then
-	for s in $@; do
-		if [ ! -r "${CONF_D}/$s" ]; then
-			echo "$NAME: Can' read \"${CONF_D}/$s\"!"
-			exit 1
-		fi
-		sys="$sys ${CONF_D}/$s"
-	done
-else
-	sys=${CONF_D}/*
-fi
-
 trap GotSignal SIGINT
 
 echo -n "Started: "; date
 
-for conf in "/etc/backup-script.conf" "${CONF_D}/backup-script.conf"; do
+for conf in "/etc/backup-script.conf" "${conf_d}/backup-script.conf"; do
 	if [ -r "$conf" ]; then
 		echo "Reading configuration: \"$conf\" ..."
 		source "$conf"
 	fi
 done
 echo
+
+if [ $# -ge 1 ]; then
+	for s in $@; do
+		if [ ! -r "${conf_d}/$s" ]; then
+			echo "$NAME: Can' read \"${conf_d}/$s\"!"
+			exit 1
+		fi
+		sys="$sys ${conf_d}/$s"
+	done
+else
+	sys=${conf_d}/*
+fi
 
 # check and create PID file
 if [ -e "$PIDFILE" ]; then
