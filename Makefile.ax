@@ -1,0 +1,43 @@
+#
+# ax-make: Alex' Simple Makefile System
+# Copyright (c)2014 Alexander Barton (alex@barton.de)
+#
+# This library is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation; either version 2.1 of the License, or
+# (at your option) any later version.
+#
+
+AX_SILENT ?= @
+
+PREFIX ?= /usr/local
+
+USER ?= $(shell id -un)
+GROUP ?= $(shell stat --format=%G $(DESTDIR)$(PREFIX) 2>/dev/null || id -gn)
+
+all: all-ax all-local
+
+all-ax: $(ALL) $(SUBDIRS)
+
+clean: clean-ax clean-local
+
+distclean: clean-local distclean-ax distclean-local
+
+maintainer-clean: clean-local distclean-local maintainer-clean-ax maintainer-clean-local
+
+check: check-pre check-ax check-local check-post
+
+install: install-ax install-local
+
+all-ax clean-ax distclean-ax maintainer-clean-ax check-ax install-ax:
+	$(AX_SILENT)for subdir in $(SUBDIRS); do \
+	  target=`echo "$@" | sed -e 's/-ax$$//'`; \
+	  echo "Making \"$$target\" in \"$$subdir\" ..."; \
+	  $(MAKE) -C $$subdir $$target || exit 1; \
+	 done
+
+.PHONY: all clean distclean maintainer-clean check install
+.PHONY: all-ax clean-ax distclean-ax maintainer-clean-ax check-ax install-ax
+.PHONY: all-local clean-local distclean-local maintainer-clean-local check-local install-local
+.PHONY: check-pre check-post
+.PHONY: $(SUBDIRS)
