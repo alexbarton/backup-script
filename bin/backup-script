@@ -175,7 +175,7 @@ for f in $sys; do
 		|| systxt="\"$fname\" [\"$system\"]"
 	[ "$local" -eq 0 ] \
 		&& echo "Working on $systxt ..." \
-		|| echo "Working on $sytxts (local system) ..."
+		|| echo "Working on $systxt (local system) ..."
 
 	count_all=$count_all+1
 
