@@ -38,6 +38,8 @@ default_compress=1
 default_ping=1
 default_local=0
 default_generations=0
+default_job_pre_exec=""
+default_job_post_exec=""
 
 Usage() {
 	echo "Usage: $NAME [<options>] [<system> [<system> [...]]]"
@@ -70,6 +72,27 @@ GotSignal() {
 	echo -n "Aborted: "; date
 	echo
 	exit 9
+}
+
+ExecJob() {
+	what="$1"
+	cmd="$2"
+
+	echo "Running job ${what}-exec command ..."
+	[ "$local" -eq 0 ] \
+		&& cmd="$ssh_cmd ${user}@${system} $cmd"
+	echo -n "Start date (${what}-exec): "; date
+	echo "$cmd"
+	if [ "$DRYRUN" -eq 0 ]; then
+		$SHELL -c "$cmd"; ret=$?
+	else
+		echo " *** Trial run, not executing ${what}-exec command!"
+		ret=0
+	fi
+	[ $ret -eq 0 ] \
+		&& echo "The ${what}-exec command completed with status 0, OK." \
+		|| echo "The ${what}-exec command completed with ERRORS, code $ret!"
+	return $ret
 }
 
 while [ $# -gt 0 ]; do
@@ -163,6 +186,8 @@ for f in $sys; do
 	ping="$default_ping"
 	local="$default_local"
 	generations="$default_generations"
+	job_pre_exec="$default_job_pre_exec"
+	job_post_exec="$default_job_post_exec"
 
 	# Read in system configuration file
 	source "$f"
@@ -269,6 +294,17 @@ for f in $sys; do
 	ssh_cmd="ssh"
 	[ -n "$ssh_args_add" ] && ssh_cmd="$ssh_cmd $ssh_args_add"
 
+	# execute job "pre-exec" command, if any
+	if [ -n "$job_pre_exec" ]; then
+		ExecJob pre "$job_pre_exec" ; ret=$?
+		if [ $ret -ne 0 ]; then
+			[ $ret -ne 99 ] && count_started=$count_started+1
+			echo "Pre-exec command failed, \"$system\" skipped!"
+			echo; continue
+		fi
+	fi
+
+	# prepare (remote) command ...
 	cmd="rsync --archive"
 	[ "$compress" -ne 0 ] && cmd="$cmd --compress"
 	cmd="$cmd --rsh=\"$ssh_cmd\" --delete --delete-excluded --sparse"
@@ -314,6 +350,11 @@ for f in $sys; do
 		ok=1
 	else
 		echo "System \"$system\" completed with ERRORS, code $ret!"
+	fi
+
+	# execute job "post-exec" command, if any
+	if [ -n "$job_post_exec" ]; then
+		ExecJob post "$job_post_exec"
 	fi
 
 	# Clean up old generations
