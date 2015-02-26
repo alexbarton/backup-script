@@ -194,7 +194,7 @@ for f in $sys; do
 		mkdir -p "$sys_target" >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
 			echo "Can't create \"$sys_target\"!? \"$system\" skipped!"
-			echo continue
+			echo; continue
 		fi
 	fi
 
