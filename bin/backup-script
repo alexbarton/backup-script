@@ -215,6 +215,7 @@ for f in $sys; do
 	fi
 
 	sys_target="$target/$fname"
+	sys_root="$sys_target"
 	if [ "$DRYRUN" -eq 0 ]; then
 		mkdir -p "$sys_target" >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
@@ -357,16 +358,15 @@ for f in $sys; do
 		ExecJob post "$job_post_exec"
 	fi
 
-	# Clean up old generations
 	if [ $generations -gt 0 ]; then
-		sys_target="$target/$fname"
-		to_delete=`ls -1t "$sys_target" 2>/dev/null | tail -n+$generations | sort`
+		# Clean up old generations
+		to_delete=`ls -1t "$sys_root" 2>/dev/null | tail -n+$generations | sort`
 		if [ -n "$to_delete" -a $ok -eq 1 ]; then
 			[ "$DRYRUN" -eq 0 ] \
 				&& echo "Deleting old backup generations:" \
 				|| echo " *** Trial run, not deleting old generations:"
 			for delete in $to_delete; do
-				dir="$sys_target/$delete"
+				dir="$sys_root/$delete"
 				if [ ! -e "$dir/.stamp" ]; then
 					echo "Not deleting \"$dir\", not a backup directory!?"
 					continue
