@@ -359,6 +359,11 @@ for f in $sys; do
 	fi
 
 	if [ $generations -gt 0 ]; then
+		# Update "latest" symlink
+		if [ "$DRYRUN" -eq 0 ]; then
+			rm -f "$sys_root/latest"
+			ln -s "$sys_target" "$sys_root/latest"
+		fi
 		# Clean up old generations
 		to_delete=`ls -1t "$sys_root" 2>/dev/null | tail -n+$generations | sort`
 		if [ -n "$to_delete" -a $ok -eq 1 ]; then
