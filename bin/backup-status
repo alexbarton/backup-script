@@ -127,7 +127,7 @@ for f in $sys; do
 		done
 	else
 		# Timestamp and result code
-		Check_Size "$s"
+		Check_Size "$target"
 		Check_Stamp "$target/.stamp"
 		snapshots=$snapshots+1
 	fi
