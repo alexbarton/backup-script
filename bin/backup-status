@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # backup-script system for cloning systems using rsync
-# Copyright (c)2008-2014 Alexander Barton, alex@barton.de
+# Copyright (c)2008-2015 Alexander Barton, alex@barton.de
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,8 +44,12 @@ Check_Stamp() {
 	# $2: padding
 
 	if [ -f "$1" ]; then
-		last=`stat "$1" | grep "^Modify: " \
-		  | cut -d':' -f2- | cut -d. -f1`
+		if [ `uname` = "Linux" ]; then
+			last=`LC_ALL=C stat "$1" | grep "^Modify: " \
+			 | cut -d':' -f2- | cut -d. -f1`
+		else
+			last=`LC_ALL=C stat -f "%Sc" "$1"`
+		fi
 		[ -n "$last" ] && echo "$2  - Date:" $last
 		unset code
 		source "$1"
