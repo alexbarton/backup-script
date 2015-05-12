@@ -244,9 +244,8 @@ for f in $sys; do
 		fi
 
 		# Search directory of last generation, if any
-		last="`ls -1 "$sys_target" 2>/dev/null | sort -r | head -n1`"
+		last="`ls -1d "$sys_target"/[0-9]* 2>/dev/null | sort -r | head -n1`"
 		if [ -n "$last" ]; then
-			last="$sys_target/$last"
 			if [ ! -d "$last" ]; then
 				echo "Last snapshot \"$last\" seems not to be a directory!? \"$system\" skipped!"
 				echo; continue
