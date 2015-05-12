@@ -11,7 +11,6 @@
 #
 
 NAME=`basename $0`
-CONF_D="/etc/backup-script.d"
 QUICK=0
 
 export LC_ALL=C
@@ -20,8 +19,15 @@ declare -i count=0
 declare -i snapshots=0
 
 # Default settings, can be overwritten in backup-script.conf:
+conf_d="/etc/backup-script.d"
 default_target=""
 default_generations=0
+
+for conf in "/etc/backup-script.conf" "${conf_d}/backup-script.conf"; do
+	if [ -r "$conf" ]; then
+		source "$conf"
+	fi
+done
 
 Check_Size() {
 	# $1: directory
@@ -68,17 +74,17 @@ esac
 
 if [ $# -ge 1 ]; then
 	for s in $@; do
-		if [ ! -r "${CONF_D}/$s" ]; then
-			echo "$NAME: Can' read \"${CONF_D}/$s\"!"
+		if [ ! -r "${conf_d}/$s" ]; then
+			echo "$NAME: Can' read \"${conf_d}/$s\"!"
 			exit 1
 		fi
-		sys="$sys ${CONF_D}/$s"
+		sys="$sys ${conf_d}/$s"
 	done
 else
-	sys=${CONF_D}/*
+	sys=${conf_d}/*
 fi
 
-[ -r "${CONF_D}/backup-script.conf" ] && source "${CONF_D}/backup-script.conf"
+[ -r "${conf_d}/backup-script.conf" ] && source "${conf_d}/backup-script.conf"
 
 for f in $sys; do
 	[ -r "$f" -a -f "$f" ] || continue
