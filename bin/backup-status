@@ -112,7 +112,7 @@ for f in $sys; do
 	[ "$system" = "localhost" -o "$system" = "127.0.0.1" ] && local=1
 
 	destdir="$target"
-	target="$target/$fname"
+	target="$target/$system"
 
 	[ -d "$target" ] || continue
 
