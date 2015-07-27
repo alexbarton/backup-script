@@ -95,6 +95,32 @@ ExecJob() {
 	return $ret
 }
 
+CreateSubvolume() {
+	volume="$2"
+
+	btrfs subvolume create "$volume"
+}
+
+CloneSubvolume() {
+	source="$1"
+	volume="$2"
+
+	btrfs subvolume snapshot "$source" "$volume"
+}
+
+RenameSubvolume() {
+	source="$1"
+	target="$2"
+
+	mv "$source" "$target"
+}
+
+DeleteSubvolume() {
+	volume="$1"
+
+	btrfs subvolume delete "$volume"
+}
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 	  "-n"|"--dry-run")
@@ -256,7 +282,7 @@ for f in $sys; do
 		if [ -n "$last" -a ! -e "$last/.stamp" ]; then
 			# Old backup directory without "stamp file", continue
 			echo "Found incomplete snapshot in \"$last\", reusing and renaming it ..."
-			mv "$last" "$sys_target" >/dev/null 2>&1
+			RenameSubvolume "$last" "$sys_target" >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
 				echo "Failed to rename last snapshot \"$last\" to \"$sys_target\"!? \"$system\" skipped!"
 				echo; continue
@@ -265,10 +291,10 @@ for f in $sys; do
 			# Old backup directory found, create new snapshot
 			echo "Found last snapshot in \"$last\"."
 			if [ "$DRYRUN" -eq 0 ]; then
-				btrfs subvolume snapshot \
+				CloneSubvolume \
 				  "$last" "$sys_target" >/dev/null 2>&1; r=$?
 				if [ $r -ne 0 ]; then
-					echo "Can't create btrfs snapshot \"$sys_target\" of \"$last\", code $r!? \"$system\" skipped!"
+					echo "Can't create snapshot \"$sys_target\" of \"$last\", code $r!? \"$system\" skipped!"
 					echo; continue
 				fi
 				echo "Created new snapshot in \"$sys_target\"."
@@ -278,10 +304,10 @@ for f in $sys; do
 		else
 			# No old backup found, create new subvolume
 			if [ "$DRYRUN" -eq 0 ]; then
-				btrfs subvolume create \
+				CreateSubvolume \
 				  "$sys_target" >/dev/null 2>&1; r=$?
 				if [ $r -ne 0 ]; then
-					echo "Can't create btrfs subvolume \"$sys_target\", code $r!? \"$system\" skipped!"
+					echo "Can't create subvolume \"$sys_target\", code $r!? \"$system\" skipped!"
 					echo; continue
 				fi
 				echo "Created new subvolume in \"$sys_target\"."
@@ -379,7 +405,7 @@ for f in $sys; do
 				 | cut -d':' -f2- | cut -d. -f1`
 				echo "Removing backup from" $last "..."
 				if [ "$DRYRUN" -eq 0 ]; then
-					btrfs subvolume delete \
+					DeleteSubvolume \
 					 "$dir" >/dev/null 2>&1
 					[ $? -eq 0 ] || \
 					 echo "Failed to delete \"$dir\"!"
