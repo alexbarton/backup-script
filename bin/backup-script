@@ -446,9 +446,10 @@ for f in $sys; do
 		fi
 		# Clean up old generations
 		to_delete=$(ls -1t "$sys_root" 2>/dev/null | tail -n+$generations | sort)
+		declare -i gen_count=$generations+2
 		if [ -n "$to_delete" -a $ok -eq 1 ]; then
 			[ "$DRYRUN" -eq 0 ] \
-				&& echo "Deleting old backup generations:" \
+				&& echo "Deleting old backup generations (keep $generations) ..." \
 				|| echo " *** Trial run, not deleting old generations:"
 			for delete in $to_delete; do
 				dir="$sys_root/$delete"
