@@ -95,30 +95,82 @@ ExecJob() {
 	return $ret
 }
 
+GetFS() {
+	dir="$1"
+	while [ -n "$dir" ]; do
+		findmnt -fn -o FSTYPE --raw "$dir" 2>/dev/null; r=$?
+		if [ $r -eq 0 ]; then
+			return 0
+		elif [ $r -eq 127 ]; then
+			echo "UNKNOWN"
+			return 1
+		fi
+		dir=$(dirname "$dir") || return 1
+	done
+}
+
 CreateSubvolume() {
 	volume="$1"
 
-	btrfs subvolume create "$volume"
+	dir=$(dirname "$volume")
+	fs=$(GetFS "$dir")
+	case "$fs" in
+	  "btrfs")
+		btrfs subvolume create "$volume"  >/dev/null || return 1
+		;;
+	  *)
+		echo "CreateSubvolume: Incompatible FS type \"$fs\" on \"$dir\"!"
+		return 9
+	esac
+	return 0
 }
 
 CloneSubvolume() {
 	source="$1"
 	volume="$2"
 
-	btrfs subvolume snapshot "$source" "$volume"
+	dir=$(dirname "source")
+	fs=$(GetFS "$source")
+	case "$fs" in
+	  "btrfs")
+		btrfs subvolume snapshot "$source" "$volume"  >/dev/null || return 1
+		;;
+	  *)
+		echo "CloneSubvolume: Incompatible FS type \"$fs\" on \"$source\"!"
+		return 9
+	esac
+	return 0
 }
 
 RenameSubvolume() {
 	source="$1"
 	target="$2"
 
-	mv "$source" "$target"
+	fs=$(GetFS "$source")
+	case "$fs" in
+	  "btrfs")
+		mv "$source" "$target" || return 1
+		;;
+	  *)
+		echo "RenameSubvolume: Incompatible FS type \"$fs\" on \"$source\"!"
+		return 9
+	esac
+	return 0
 }
 
 DeleteSubvolume() {
 	volume="$1"
 
-	btrfs subvolume delete "$volume"
+	fs=$(GetFS "$source")
+	case "$fs" in
+	  "btrfs")
+		btrfs subvolume delete "$volume" >/dev/null || return 1
+		;;
+	  *)
+		echo "DeleteSubvolume: Incompatible FS type \"$fs\" on \"$volume\"!"
+		return 9
+	esac
+	return 0
 }
 
 while [ $# -gt 0 ]; do
@@ -282,7 +334,7 @@ for f in $sys; do
 		if [ -n "$last" -a ! -e "$last/.stamp" ]; then
 			# Old backup directory without "stamp file", continue
 			echo "Found incomplete snapshot in \"$last\", reusing and renaming it ..."
-			RenameSubvolume "$last" "$sys_target" >/dev/null 2>&1
+			RenameSubvolume "$last" "$sys_target"
 			if [ $? -ne 0 ]; then
 				echo "Failed to rename last snapshot \"$last\" to \"$sys_target\"!? \"$system\" skipped!"
 				echo; continue
@@ -291,8 +343,7 @@ for f in $sys; do
 			# Old backup directory found, create new snapshot
 			echo "Found last snapshot in \"$last\"."
 			if [ "$DRYRUN" -eq 0 ]; then
-				CloneSubvolume \
-				  "$last" "$sys_target" >/dev/null 2>&1; r=$?
+				CloneSubvolume "$last" "$sys_target"; r=$?
 				if [ $r -ne 0 ]; then
 					echo "Can't create snapshot \"$sys_target\" of \"$last\", code $r!? \"$system\" skipped!"
 					echo; continue
@@ -304,8 +355,7 @@ for f in $sys; do
 		else
 			# No old backup found, create new subvolume
 			if [ "$DRYRUN" -eq 0 ]; then
-				CreateSubvolume \
-				  "$sys_target" >/dev/null 2>&1; r=$?
+				CreateSubvolume "$sys_target"; r=$?
 				if [ $r -ne 0 ]; then
 					echo "Can't create subvolume \"$sys_target\", code $r!? \"$system\" skipped!"
 					echo; continue
@@ -405,10 +455,9 @@ for f in $sys; do
 				 | cut -d':' -f2- | cut -d. -f1)
 				echo "Removing backup from" $last "..."
 				if [ "$DRYRUN" -eq 0 ]; then
-					DeleteSubvolume \
-					 "$dir" >/dev/null 2>&1
+					DeleteSubvolume "$dir"
 					[ $? -eq 0 ] || \
-					 echo "Failed to delete \"$dir\"!"
+					  echo "Failed to delete \"$dir\"!"
 				fi
 			done
 			echo -n "Clean up finished: "; date
