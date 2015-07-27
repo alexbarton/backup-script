@@ -96,7 +96,7 @@ ExecJob() {
 }
 
 CreateSubvolume() {
-	volume="$2"
+	volume="$1"
 
 	btrfs subvolume create "$volume"
 }
