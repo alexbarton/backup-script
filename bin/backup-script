@@ -150,7 +150,7 @@ done
 echo
 
 if [ $# -ge 1 ]; then
-	for s in $@; do
+	for s in "$@"; do
 		if [ ! -r "${conf_d}/$s" ]; then
 			echo "$NAME: Can' read \"${conf_d}/$s\"!"
 			exit 1
@@ -158,7 +158,7 @@ if [ $# -ge 1 ]; then
 		sys="$sys ${conf_d}/$s"
 	done
 else
-	sys=${conf_d}/*
+	sys="${conf_d}/"*
 fi
 
 # check and create PID file
