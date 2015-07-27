@@ -406,7 +406,7 @@ for f in $sys; do
 	echo "$cmd"
 	count_started=$count_started+1
 	ok=0
-	
+
 	if [ "$DRYRUN" -eq 0 ]; then
 		rm -f "$sys_target/.stamp"
 		$SHELL -c "$cmd"; ret=$?
