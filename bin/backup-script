@@ -29,6 +29,7 @@ destinations=""
 conf_d="/etc/backup-script.d"
 pre_exec=""
 post_exec=""
+default_source_root="/"
 default_target=""
 default_user="root"
 default_ssh_args_add=""
@@ -256,6 +257,7 @@ for f in $sys; do
 	# Set global defaults
 	system="$fname"
 	user="$default_user"
+	source_root="$default_source_root"
 	target="$default_target"
 	ssh_args_add="$default_ssh_args_add"
 	rsync_args_add="$default_rsync_args_add"
@@ -385,16 +387,18 @@ for f in $sys; do
 	[ "$compress" -ne 0 ] && cmd="$cmd --compress"
 	cmd="$cmd --rsh=\"$ssh_cmd\" --delete --delete-excluded --sparse"
 	[ "$VERBOSE" -gt 0 ] && cmd="$cmd --progress"
-	cmd="$cmd --exclude=/dev --exclude=/proc --exclude=/sys"
-	cmd="$cmd --exclude=/run --exclude=/tmp --exclude=/var/tmp"
-	cmd="$cmd --exclude=/media --exclude=/mnt --exclude=/net"
-	cmd="$cmd --exclude=/var/cache/apt --exclude=/var/log"
+	if [ "$source_root" = "$default_source_root" ]; then
+		cmd="$cmd --exclude=/dev --exclude=/proc --exclude=/sys"
+		cmd="$cmd --exclude=/run --exclude=/tmp --exclude=/var/tmp"
+		cmd="$cmd --exclude=/media --exclude=/mnt --exclude=/net"
+		cmd="$cmd --exclude=/var/cache/apt --exclude=/var/log"
+	fi
 	[ -n "$exclude_args_add" ] && cmd="$cmd $exclude_args_add"
 	[ -n "$rsync_args_add" ] && cmd="$cmd $rsync_args_add"
 
 	[ "$local" -eq 0 ] \
-		&& cmd="$cmd ${user}@${system}:/ $sys_target/" \
-		|| cmd="$cmd / $sys_target/"
+		&& cmd="$cmd ${user}@${system}:$source_root $sys_target/" \
+		|| cmd="$cmd $source_root $sys_target/"
 
 	echo "Backing up to \"$sys_target\" ..."
 	echo -n "Start date: "; date
