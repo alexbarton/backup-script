@@ -113,10 +113,21 @@ Default: 0 (off; use ssh).
 
 Number of generations to keep. Default: 0 (none).
 
-On a *btrfs* target file systems (see `target` variable), this script can
-generate generations using *btrfs snapshots*: the script creates a new snapshot
+On a suitable target file systems (see `target` variable), this script can
+generate generations using snapshots: the script creates a new snapshot
 named with the timestamp for each generation inside of the system directory
 inside of the target directory.
+
+Supported file systems are:
+
+ * *btrfs*:
+   All generations are btrfs subvolumes and named after the date and time.
+ * *ZFS*:
+   All generations are ZFS filesystems. Latest generation is named `current`,
+   olders are links to the ZFS snapshot directories.
+
+The latest snapshot is always reachable using a symlink named `latest`
+inside the system directory.
 
 ### [default_]job_pre_exec
 

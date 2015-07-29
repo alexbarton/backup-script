@@ -122,6 +122,9 @@ CreateSubvolume() {
 	  "btrfs")
 		btrfs subvolume create "$volume"  >/dev/null || return 1
 		;;
+	  "zfs")
+		zfs create "$(echo "$volume" | cut -c2-)" || return 1
+		;;
 	  *)
 		echo "CreateSubvolume: Incompatible FS type \"$fs\" on \"$dir\"!"
 		return 9
@@ -135,12 +138,20 @@ CloneSubvolume() {
 	local snapshot="$3"
 	local dir
 	local fs
+	local link_name
 
 	dir=$(dirname "source")
 	fs=$(GetFS "$source")
 	case "$fs" in
 	  "btrfs")
 		btrfs subvolume snapshot "$source" "$snapshot"  >/dev/null || return 1
+		;;
+	  "zfs")
+		zfs snapshot "$snapshot" || return 1
+		link_name="$(echo "$snapshot" | cut -d@ -f2-)"
+		ln -s \
+			"$volume/.zfs/snapshot/$link_name" \
+			"$(dirname "$volume")/$link_name"
 		;;
 	  *)
 		echo "CloneSubvolume: Incompatible FS type \"$fs\" on \"$source\"!"
@@ -159,6 +170,12 @@ RenameSubvolume() {
 	  "btrfs")
 		mv "$source" "$target" || return 1
 		;;
+	  "zfs")
+		zfs rename \
+		  "$(echo "$source" | cut -c2-)" \
+		  "$(echo "$target" | cut -c2-)" \
+			|| return 1
+		;;
 	  *)
 		echo "RenameSubvolume: Incompatible FS type \"$fs\" on \"$source\"!"
 		return 9
@@ -169,11 +186,23 @@ RenameSubvolume() {
 DeleteSubvolume() {
 	local volume="$1"
 	local fs
+	local id
+	local snapshot
 
 	fs=$(GetFS "$volume")
 	case "$fs" in
 	  "btrfs")
 		btrfs subvolume delete "$volume" >/dev/null || return 1
+		;;
+	  "zfs")
+		id="$(basename "$volume")"
+		if [ -h "$volume" ]; then
+			snapshot="$(dirname "$volume")/current@$id"
+		else
+			snapshot="$volume"
+		fi
+		zfs destroy -r "$(echo "$snapshot" | cut -c2-)" >/dev/null || return 1
+		[ -h "$volume" ] && rm "$volume"
 		;;
 	  *)
 		echo "DeleteSubvolume: Incompatible FS type \"$fs\" on \"$volume\"!"
@@ -201,6 +230,14 @@ Initialize_Last_SysTarget_Snapshot() {
 		fi
 		sys_target="$sys_target/$(date +%Y%m%d-%H%M%S)"
 		snapshot="$sys_target"
+		;;
+	  "zfs")
+		# On ZFS, the last generation is always named "current"
+		[ -e "$sys_target/current" ] \
+			&& last="$sys_target/current" \
+			|| last=""
+		snapshot="$(echo "$sys_target/current" | cut -c2-)@$(date +%Y%m%d-%H%M%S)"
+		sys_target="$sys_target/current"
 		;;
 	  *)
 		echo "Initialize_Last_SysTarget_Snapshot: Incompatible FS type \"$fs\" on \"$sys_target\"!"
