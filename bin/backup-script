@@ -355,8 +355,12 @@ for f in $sys; do
 
 	sys_target="$target/$fname"
 	sys_root="$sys_target"
-	if [ "$DRYRUN" -eq 0 ]; then
-		mkdir -p "$sys_target" >/dev/null 2>&1
+	if [ "$DRYRUN" -eq 0 -a ! -e "$sys_target" ]; then
+		if [ $generations -gt 0 ]; then
+			CreateSubvolume "$sys_target"
+		else
+			mkdir -p "$sys_target"
+		fi
 		if [ $? -ne 0 ]; then
 			echo "Can't create \"$sys_target\"!? \"$system\" skipped!"
 			echo; continue
