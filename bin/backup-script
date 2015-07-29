@@ -182,6 +182,33 @@ DeleteSubvolume() {
 	return 0
 }
 
+Initialize_Last_SysTarget_Snapshot() {
+	sys_target="$1"
+	unset last
+	unset snapshot
+
+	fs=$(GetFS "$sys_target")
+	case "$fs" in
+	  "btrfs")
+		# Search directory of last generation, if any
+		last=$(ls -1d "$sys_target"/[0-9]* 2>/dev/null | sort -r | head -n1)
+		if [ -n "$last" ]; then
+			if [ ! -d "$last" ]; then
+				echo "Last snapshot \"$last\" seems not to be a directory!? \"$system\" skipped!"
+				echo
+				return 1
+			fi
+		fi
+		sys_target="$sys_target/$(date +%Y%m%d-%H%M%S)"
+		snapshot="$sys_target"
+		;;
+	  *)
+		echo "Initialize_Last_SysTarget_Snapshot: Incompatible FS type \"$fs\" on \"$sys_target\"!"
+		return 1
+	esac
+	return 0
+}
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 	  "-n"|"--dry-run")
@@ -355,16 +382,7 @@ for f in $sys; do
 			echo; continue
 		fi
 
-		# Search directory of last generation, if any
-		last=$(ls -1d "$sys_target"/[0-9]* 2>/dev/null | sort -r | head -n1)
-		if [ -n "$last" ]; then
-			if [ ! -d "$last" ]; then
-				echo "Last snapshot \"$last\" seems not to be a directory!? \"$system\" skipped!"
-				echo; continue
-			fi
-		fi
-		sys_target="$sys_target/$(date +%Y%m%d-%H%M%S)"
-		snapshot="$sys_target"
+		Initialize_Last_SysTarget_Snapshot "$sys_target" || continue
 
 		if [ -n "$last" -a ! -e "$last/.stamp" ]; then
 			# Old backup directory without "stamp file", continue
