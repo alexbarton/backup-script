@@ -132,6 +132,7 @@ CreateSubvolume() {
 CloneSubvolume() {
 	local source="$1"
 	local volume="$2"
+	local snapshot="$3"
 	local dir
 	local fs
 
@@ -139,7 +140,7 @@ CloneSubvolume() {
 	fs=$(GetFS "$source")
 	case "$fs" in
 	  "btrfs")
-		btrfs subvolume snapshot "$source" "$volume"  >/dev/null || return 1
+		btrfs subvolume snapshot "$source" "$snapshot"  >/dev/null || return 1
 		;;
 	  *)
 		echo "CloneSubvolume: Incompatible FS type \"$fs\" on \"$source\"!"
@@ -339,6 +340,7 @@ for f in $sys; do
 			fi
 		fi
 		sys_target="$sys_target/$(date +%Y%m%d-%H%M%S)"
+		snapshot="$sys_target"
 
 		if [ -n "$last" -a ! -e "$last/.stamp" ]; then
 			# Old backup directory without "stamp file", continue
@@ -352,12 +354,12 @@ for f in $sys; do
 			# Old backup directory found, create new snapshot
 			echo "Found last snapshot in \"$last\"."
 			if [ "$DRYRUN" -eq 0 ]; then
-				CloneSubvolume "$last" "$sys_target"; r=$?
+				CloneSubvolume "$last" "$sys_target" "$snapshot"; r=$?
 				if [ $r -ne 0 ]; then
-					echo "Can't create snapshot \"$sys_target\" of \"$last\", code $r!? \"$system\" skipped!"
+					echo "Can't create snapshot \"$snapshot\" of \"$last\", code $r!? \"$system\" skipped!"
 					echo; continue
 				fi
-				echo "Created new snapshot in \"$sys_target\"."
+				echo "Created new snapshot in \"$snapshot\"."
 			else
 				echo " *** Trial run, not creating new snapshot in \"$sys_target\"!"
 			fi
