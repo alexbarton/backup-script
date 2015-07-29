@@ -67,6 +67,13 @@ System host name. Default: file name.
 
 Remote user. Default: `root`.
 
+### [default_]source_root
+
+Remote *root* directory, must end with a slash ("/") character! Default: "/".
+
+When saving the whole (remote) system ("/"), default excludes are set up
+automatically, which exclude standard system directories like /sys and /proc.
+
 ### [default_]target
 
 Local backup directory. The backup of each system is stored in a folder named
