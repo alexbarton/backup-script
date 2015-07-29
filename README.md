@@ -17,7 +17,7 @@ Options:
 - `-p`, `--progress`: Show progress, see rsync(1).
 - `-n`, `--dry-run`: Test run only, don't copy any data.
 
-When no *system* is given, all defined systems are used.
+When no *system* is given, all defined systems are backed up.
 
 ### backup-script-wrapper
 
@@ -38,15 +38,17 @@ Options:
 
 ## Configuration
 
-All defauklt configuration variables are read from `/etc/backup-script.conf`,
+All default configuration variables are read from `/etc/backup-script.conf` or
 from `/etc/backup-script.d/backup-script.conf` (deprecated). The individual
 systems are configured using individual files in `/etc/backup-script.d/`, one
-for each system to backup (files ending in `*.sh` are skipped).
+for each system to backup (files ending in `*.sh` are skipped, as well as
+files named `backup-script.conf`). Please avoid spaces and other "special"
+characters!
 
 Variables in `backup-script.conf` must be prefixed with `default_` to define
 default values for all systems.
 
-All default can be overwritten in individual system configuration files.
+All defaults can be overwritten in individual system configuration files.
 
 For example:
 
@@ -55,7 +57,7 @@ For example:
 - `/etc/backups-script.d/clientXY.example.com`: configuration for host 2
 
 
-## Configuration Variable
+## Configuration Variables
 
 ### system
 
@@ -115,7 +117,7 @@ Number of generations to keep. Default: 0 (none).
 
 On a suitable target file systems (see `target` variable), this script can
 generate generations using snapshots: the script creates a new snapshot
-named with the timestamp for each generation inside of the system directory
+named with the time stamp for each generation inside of the system directory
 inside of the target directory.
 
 Supported file systems are:
@@ -123,8 +125,8 @@ Supported file systems are:
  * *btrfs*:
    All generations are btrfs subvolumes and named after the date and time.
  * *ZFS*:
-   All generations are ZFS filesystems. Latest generation is named `current`,
-   olders are links to the ZFS snapshot directories.
+   All generations are ZFS file systems. Latest generation is named `current`,
+   elders are links to the ZFS snapshot directories.
 
 The latest snapshot is always reachable using a symlink named `latest`
 inside the system directory.
