@@ -76,8 +76,8 @@ GotSignal() {
 }
 
 ExecJob() {
-	what="$1"
-	cmd="$2"
+	local what="$1"
+	local cmd="$2"
 
 	echo "Running job ${what}-exec command ..."
 	[ "$local" -eq 0 ] \
@@ -85,7 +85,7 @@ ExecJob() {
 	echo -n "Start date (${what}-exec): "; date
 	echo "$cmd"
 	if [ "$DRYRUN" -eq 0 ]; then
-		$SHELL -c "$cmd"; ret=$?
+		$SHELL -c "$cmd"; local ret=$?
 	else
 		echo " *** Trial run, not executing ${what}-exec command!"
 		ret=0
@@ -97,9 +97,10 @@ ExecJob() {
 }
 
 GetFS() {
-	dir="$1"
+	local dir="$1"
+
 	while [ -n "$dir" ]; do
-		findmnt -fn -o FSTYPE --raw "$dir" 2>/dev/null; r=$?
+		findmnt -fn -o FSTYPE --raw "$dir" 2>/dev/null; local r=$?
 		if [ $r -eq 0 ]; then
 			return 0
 		elif [ $r -eq 127 ]; then
@@ -111,7 +112,9 @@ GetFS() {
 }
 
 CreateSubvolume() {
-	volume="$1"
+	local volume="$1"
+	local fs
+	local dir
 
 	dir=$(dirname "$volume")
 	fs=$(GetFS "$dir")
@@ -127,8 +130,10 @@ CreateSubvolume() {
 }
 
 CloneSubvolume() {
-	source="$1"
-	volume="$2"
+	local source="$1"
+	local volume="$2"
+	local dir
+	local fs
 
 	dir=$(dirname "source")
 	fs=$(GetFS "$source")
@@ -144,8 +149,9 @@ CloneSubvolume() {
 }
 
 RenameSubvolume() {
-	source="$1"
-	target="$2"
+	local source="$1"
+	local target="$2"
+	local fs
 
 	fs=$(GetFS "$source")
 	case "$fs" in
@@ -160,7 +166,8 @@ RenameSubvolume() {
 }
 
 DeleteSubvolume() {
-	volume="$1"
+	local volume="$1"
+	local fs
 
 	fs=$(GetFS "$source")
 	case "$fs" in
