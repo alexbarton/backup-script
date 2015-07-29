@@ -170,7 +170,7 @@ DeleteSubvolume() {
 	local volume="$1"
 	local fs
 
-	fs=$(GetFS "$source")
+	fs=$(GetFS "$volume")
 	case "$fs" in
 	  "btrfs")
 		btrfs subvolume delete "$volume" >/dev/null || return 1
