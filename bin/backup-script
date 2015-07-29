@@ -452,8 +452,8 @@ for f in $sys; do
 			ln -s "$sys_target" "$sys_root/latest"
 		fi
 		# Clean up old generations
-		to_delete=$(ls -1t "$sys_root" 2>/dev/null | tail -n+$generations | sort)
 		declare -i gen_count=$generations+2
+		to_delete=$(ls -1t "$sys_root" 2>/dev/null | tail -n+$gen_count | sort)
 		if [ -n "$to_delete" -a $ok -eq 1 ]; then
 			[ "$DRYRUN" -eq 0 ] \
 				&& echo "Deleting old backup generations (keep $generations) ..." \
