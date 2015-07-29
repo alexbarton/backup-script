@@ -277,8 +277,32 @@ for f in $sys; do
 	job_pre_exec="$default_job_pre_exec"
 	job_post_exec="$default_job_post_exec"
 
+	# Compatibility with backup-pull(1) script: Save global values ...
+	pre_exec_saved="$pre_exec"
+	post_exec_saved="$post_exec"
+
+	# Compatibility with backup-pull(1) script: Set defaults
+	unset host
+	unset source
+	unset pre_exec
+	unset post_exec
+
 	# Read in system configuration file
 	source "$f"
+
+	# Compatibility with backup-pull(1) script: Fix up configuration
+	[ "$system" = "$fname" -a -n "$host" ] \
+		&& system="$host"
+	[ "$source_root" = "$default_source_root" -a -n "$source" ] \
+		&& source_root="$source"
+	[ -z "$job_pre_exec" -a -n "$pre_exec" ] \
+		&& job_pre_exec="$pre_exec"
+	[ -z "$job_post_exec" -a -n "$post_exec" ] \
+		&& job_post_exec="$post_exec"
+
+	# Compatibility with backup-pull(1) script: Restore global values ...
+	pre_exec="$pre_exec_saved"
+	post_exec="$post_exec_saved"
 
 	# Validate configuration
 	[ "$system" = "localhost" -o "$system" = "127.0.0.1" ] && local=1

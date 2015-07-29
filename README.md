@@ -128,3 +128,13 @@ run is skipped!
 ### [default_]job_post_exec
 
 Optional script to execute after `rsync` exited. Default: none.
+
+### Compatibility Variables
+
+The following configurations variables used by the backup-pull(1) script in job
+definition files are automatically mapped to the new backup-script variables:
+
+* host -> system
+* source -> source_root
+* pre_exec -> job_pre_exec
+* post_exec -> job_post_exec
