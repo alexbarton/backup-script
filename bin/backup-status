@@ -34,7 +34,7 @@ Check_Size() {
 	# $2: padding
 
 	if [ "$QUICK" = "0" ]; then
-		size=`du -sh "$1" | cut -f1`
+		size=`du -Hhs "$1" | cut -f1`
 		echo "$2  - Size:" $size
 	fi
 }
