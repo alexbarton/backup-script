@@ -5,7 +5,7 @@
 
 SUBDIRS = bin etc examples
 
-include ./Makefile.ax
+include ./lib/Makefile.ax
 
 install-local:
 	install -d -o $(USER) -g $(GROUP) -m 755 \

@@ -3,4 +3,4 @@
 # Copyright (c)2008-2015 Alexander Barton <alex@barton.de>
 #
 
-include ../Makefile.ax
+include ../lib/Makefile.ax
