@@ -445,7 +445,7 @@ for f in $sys; do
 				fi
 				echo "Created new snapshot in \"$snapshot\"."
 			else
-				echo " *** Trial run, not creating new snapshot in \"$sys_target\"!"
+				echo " *** Trial run, not creating new snapshot in \"$snapshot\"!"
 			fi
 		else
 			# No old backup found, create new subvolume
