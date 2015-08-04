@@ -234,10 +234,21 @@ Initialize_Last_SysTarget_Snapshot() {
 		;;
 	  "zfs")
 		# On ZFS, the last generation is always named "current"
-		[ -e "$sys_target/current" ] \
-			&& last="$sys_target/current" \
-			|| last=""
-		snapshot="$(echo "$sys_target/current" | cut -c2-)@$(date +%Y%m%d-%H%M%S)"
+		if [ -e "$sys_target/current" ]; then
+			last="$sys_target/current"
+			if [ "$(uname)" = "Linux" ]; then
+				date=$(LC_ALL=C stat "$1" | grep "^Modify: " \
+				 | cut -d':' -f2- | cut -d. -f1)
+			else
+				date=$(LC_ALL=C stat -f "%Sc" "$1")
+			fi
+			date=$(echo "$date" | sed -e's/^ //g' -e 's/[-:]//g' -e 's/ /-/g')
+
+		else
+			last=""
+			date="$(date +%Y%m%d-%H%M%S)"
+		fi
+		snapshot="$(echo "$sys_target/current" | cut -c2-)@$date"
 		sys_target="$sys_target/current"
 		;;
 	  *)
