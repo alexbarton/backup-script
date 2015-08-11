@@ -391,6 +391,13 @@ for f in $sys; do
 		source="$source/"
 	esac
 
+	# Make sure "target" DOESN'T end with a slash ("/")
+	case "$target" in
+	  "*/")
+		target=$( echo "$target" | sed -e 's/\/$//g' )
+		;;
+	esac
+
 	[ "$system" = "$fname" ] \
 		&& systxt="\"$system\"" \
 		|| systxt="\"$fname\" [\"$system\"]"
