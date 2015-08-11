@@ -383,6 +383,14 @@ for f in $sys; do
 	# Validate configuration
 	[ "$system" = "localhost" -o "$system" = "127.0.0.1" ] && local=1
 
+	# Make sure "source" ends with a slash ("/")
+	case "$source" in
+	  "*/")
+		;;
+	  "*")
+		source="$source/"
+	esac
+
 	[ "$system" = "$fname" ] \
 		&& systxt="\"$system\"" \
 		|| systxt="\"$fname\" [\"$system\"]"
