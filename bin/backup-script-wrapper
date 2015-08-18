@@ -10,7 +10,15 @@
 # Please read the file COPYING, README and AUTHORS for more information.
 #
 
-[ -n "$MAILTO" ] || MAILTO="logcheck"
+if [ -z "$MAILTO" ]; then
+	if id "logcheck" >/dev/null 2>&1; then
+		MAILTO="logcheck"
+	elif fgrep "logcheck:" /etc/aliases >/dev/null 2>&1; then
+		MAILTO="logcheck"
+	else
+		MAILTO="root"
+	fi
+fi
 
 NAME="backup-script"
 HOST=`hostname`
