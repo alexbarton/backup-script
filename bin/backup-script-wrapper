@@ -25,6 +25,7 @@ HOST=`hostname -f`
 TMP=`mktemp /tmp/$NAME.XXXXXXXX` || exit 1
 LOGFILE="/var/log/backup-script.log"
 DELIMITER="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+SUBJECT="$NAME results"
 
 PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 export PATH
@@ -47,7 +48,14 @@ else
 	echo "(Can't write logfile: \"$LOGFILE\"!)"
 fi
 
-cat "$TMP" | mail -s "$HOST: $NAME results" "$MAILTO"
+case "$r" in
+	0)
+		;;
+	*)
+		SUBJECT="$SUBJECT - with ERRORS!"
+esac
+
+cat "$TMP" | mail -s "$HOST: $SUBJECT" "$MAILTO"
 
 rm -f "$TMP"
 exit $r
