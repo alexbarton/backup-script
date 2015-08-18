@@ -11,6 +11,7 @@
 #
 
 NAME=`basename $0`
+PIDFILE="/var/run/backup-script.pid"
 QUICK=0
 
 export LC_ALL=C
@@ -73,6 +74,21 @@ Check_Stamp() {
 	fi
 }
 
+if [ "$1" == "-r" -o "$1" == "--running" ]; then
+	pid="$(cat "$PIDFILE" 2>/dev/null)"
+	if [ -n "$pid" ]; then
+		if kill -0 "$pid" >/dev/null 2>&1; then
+			echo "Backup job running with PID $pid."
+			exit 0
+		else
+			echo "No backup running (invalid PID $pid in \"$PIDFILE\")."
+			exit 1
+		fi
+	fi
+	echo "No backup running (no PID file \"$PIDFILE\" found)."
+	exit 1
+fi
+
 if [ "$1" == "-q" ]; then
 	QUICK=1
 	shift
@@ -81,6 +97,7 @@ fi
 case "$1" in
     "-"*)
 	echo "Usage: $NAME [-q] [<system> [<system> [...]]]"
+	echo "       $NAME {-r|--running}"
 	exit 2
 	;;
 esac
