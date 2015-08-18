@@ -27,13 +27,15 @@ TMP=`mktemp /tmp/$NAME.XXXXXXXX` || exit 11
 PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 export PATH
 
-echo "$NAME Report" >"$TMP"
-echo >>"$TMP"
-echo " - Host: `hostname -f`" >>"$TMP"
-echo " - User: `id -un`" >>"$TMP"
-echo >>"$TMP"
+exec >"$TMP" 2>&1
 
-"$(dirname "$0")/backup-script" "$@" >>"$TMP" 2>&1
+echo "$NAME Report"
+echo
+echo " - Host: `hostname -f`"
+echo " - User: `id -un`"
+echo
+
+"$(dirname "$0")/backup-script" "$@"
 
 cat "$TMP" | mail -s "$HOST: $NAME results" "$MAILTO"
 
