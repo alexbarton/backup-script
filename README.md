@@ -38,17 +38,24 @@ Options:
 
 ## Configuration
 
-All default configuration variables are read from `/etc/backup-script.conf` or
-from `/etc/backup-script.d/backup-script.conf` (deprecated). The individual
-systems are configured using individual files in `/etc/backup-script.d/`, one
-for each system to backup (files ending in `*.sh` are skipped, as well as
-files named `backup-script.conf`). Please avoid spaces and other "special"
-characters!
+All default configuration variables are read from the first file found of this
+list: `/usr/local/etc/backup-scrupt.conf`, `/etc/backup-script.conf` or
+from `/etc/backup-script.d/backup-script.conf` (deprecated).
+
+All systems which should be backed-up are configured using  individual files
+in the configuration directory, which is `/usr/local/etc/backup-script.d/` or
+`/etc/backup-script.d/` by default (whichever is found first), and can be
+specified using the `conf_d` variable in the main configuration file.
+
+The must be one file for each system to backup (files ending in `*.sh` are
+skipped, as well as files named `backup-script.conf`). Please avoid spaces and
+other "special" characters! The filename is used as hostname for the system by
+default, but this can be overwritten using the `system` configuration variable.
 
 Variables in `backup-script.conf` must be prefixed with `default_` to define
 default values for all systems.
 
-All defaults can be overwritten in individual system configuration files.
+All defaults can be overwritten in the individual system configuration files.
 
 For example:
 
