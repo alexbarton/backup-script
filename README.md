@@ -151,3 +151,14 @@ definition files are automatically mapped to the new backup-script variables:
 * source -> source_root
 * pre_exec -> job_pre_exec
 * post_exec -> job_post_exec
+
+
+## Exit codes
+
+- 1: Unspecific Error!
+- 2: Usage information has been shown.
+- 3: Can't read system definition
+- 4: PID-file exists!
+- 5: Pre-exec command failed!
+- 6: There have been systems with errors!
+- 9: Aborted (CTRL-C)!

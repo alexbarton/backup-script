@@ -55,7 +55,7 @@ Usage() {
 	echo "Configuration file is \"$conf\","
 	echo "using \"$conf_d\" as configuration directory."
 	echo
-	exit 1
+	exit 2
 }
 
 CleanUp() {
@@ -306,7 +306,7 @@ if [ $# -ge 1 ]; then
 	for s in "$@"; do
 		if [ ! -r "${conf_d}/$s" ]; then
 			echo "$NAME: Can' read \"${conf_d}/$s\"!"
-			exit 1
+			exit 3
 		fi
 		sys="$sys ${conf_d}/$s"
 	done
@@ -321,7 +321,7 @@ if [ -e "$PIDFILE" ]; then
 	echo
 	echo -n "Aborted: "; date
 	echo
-	exit 3
+	exit 4
 fi
 touch "$PIDFILE" 2>/dev/null
 if [ $? -ne 0 ]; then
@@ -338,7 +338,7 @@ if [ -n "$pre_exec" ]; then
 		echo "Error: pre-exec command failed!"; echo
 		CleanUp
 		echo "Aborting backup."; echo
-		exit 2
+		exit 5
 	fi
 	sleep 2
 	echo
@@ -557,8 +557,7 @@ for f in $sys; do
 
 	if [ $ret -eq 20 ]; then
 		echo "Backup of \"$system\" interrupted. Aborting ..."
-		CleanUp
-		exit 1
+		GotSignal
 	fi
 
 	echo -n "End date: "; date
@@ -639,7 +638,7 @@ echo
 if [ $count_started -ne $count_ok ]; then
 	echo "----->  THERE HAVE BEEN ERRORS!  <-----"
 	echo
-	exit 1
+	exit 6
 fi
 
 # -eof-

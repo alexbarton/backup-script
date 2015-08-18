@@ -22,7 +22,7 @@ fi
 
 NAME="backup-script"
 HOST=`hostname`
-TMP=`mktemp /tmp/$NAME.XXXXXXXX` || exit 11
+TMP=`mktemp /tmp/$NAME.XXXXXXXX` || exit 1
 LOGFILE="/var/log/backup-script.log"
 
 PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
