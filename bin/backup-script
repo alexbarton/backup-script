@@ -397,7 +397,11 @@ for f in $sys; do
 	post_exec="$post_exec_saved"
 
 	# Validate configuration
-	[ "$system" = "localhost" -o "$system" = "127.0.0.1" ] && local=1
+	if [ "$system" = "localhost" -o "$system" = "127.0.0.1" ]; then
+		# Local system
+		local=1
+		compress=0
+	fi
 
 	# Make sure "source" ends with a slash ("/")
 	case "$source" in
