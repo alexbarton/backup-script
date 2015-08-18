@@ -25,7 +25,7 @@ echo " - Host: `hostname -f`" >>"$TMP"
 echo " - User: `id -un`" >>"$TMP"
 echo >>"$TMP"
 
-`dirname "$0"`/backup-script $* >>"$TMP" 2>&1
+"$(dirname "$0")/backup-script" "$@" >>"$TMP" 2>&1
 
 cat "$TMP" | mail -s "$HOST: $NAME results" "$MAILTO"
 
