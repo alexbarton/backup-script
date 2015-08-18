@@ -258,6 +258,15 @@ Initialize_Last_SysTarget_Snapshot() {
 	return 0
 }
 
+# Search configuration file (last one is used as default!)
+for conf in \
+	"/usr/local/etc/backup-script.conf" \
+	"${conf_d}/backup-script.conf" \
+	"/etc/backup-script.conf" \
+; do
+	[ -r "$conf" ] && break
+done
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 	  "-n"|"--dry-run")
@@ -278,12 +287,13 @@ trap GotSignal SIGINT
 
 echo -n "Started: "; date
 
-for conf in "/etc/backup-script.conf" "${conf_d}/backup-script.conf"; do
-	if [ -r "$conf" ]; then
-		echo "Reading configuration: \"$conf\" ..."
-		source "$conf"
-	fi
-done
+# Read in configuration file
+if [ -r "$conf" ]; then
+	echo "Reading configuration: \"$conf\" ..."
+	source "$conf"
+else
+	echo "No configuration file found, using defaults."
+fi
 echo
 
 if [ $# -ge 1 ]; then
