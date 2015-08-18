@@ -50,6 +50,9 @@ Usage() {
 	echo
 	echo "When no <system> is given, all defined systems are used."
 	echo
+	echo "Configuration file is \"$conf\","
+	echo "using \"$conf_d\" as configuration directory."
+	echo
 	exit 1
 }
 
