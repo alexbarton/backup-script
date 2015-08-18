@@ -79,6 +79,8 @@ if [ "$1" == "-r" -o "$1" == "--running" ]; then
 	if [ -n "$pid" ]; then
 		if kill -0 "$pid" >/dev/null 2>&1; then
 			echo "Backup job running with PID $pid."
+			echo
+			pstree -ap "$pid" 2>/dev/null
 			exit 0
 		else
 			echo "No backup running (invalid PID $pid in \"$PIDFILE\")."
