@@ -53,14 +53,14 @@ Check_Stamp() {
 	# $2: padding
 
 	if [ -f "$1" ]; then
-		if [ `uname` = "Linux" ]; then
+		if [ "$(uname)" = "Linux" ]; then
 			last=`LC_ALL=C stat "$1" | grep "^Modify: " \
 			 | cut -d':' -f2- | cut -d. -f1`
 		else
 			last=`LC_ALL=C stat -f "%Sc" "$1"`
 		fi
 		[ -n "$last" ] && echo "$2  - Date:" $last
-		unset code
+		code=
 		source "$1"
 		case "$code" in
 		  0)	txt=", OK"; ;;
@@ -86,7 +86,7 @@ case "$1" in
 esac
 
 if [ $# -ge 1 ]; then
-	for s in $@; do
+	for s in "$@"; do
 		if [ ! -r "${conf_d}/$s" ]; then
 			echo "$NAME: Can' read \"${conf_d}/$s\"!"
 			exit 1
@@ -94,7 +94,7 @@ if [ $# -ge 1 ]; then
 		sys="$sys ${conf_d}/$s"
 	done
 else
-	sys=${conf_d}/*
+	sys="${conf_d}/"*
 fi
 
 [ -r "${conf_d}/backup-script.conf" ] && source "${conf_d}/backup-script.conf"
