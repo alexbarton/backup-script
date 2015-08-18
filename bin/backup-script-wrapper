@@ -21,7 +21,7 @@ if [ -z "$MAILTO" ]; then
 fi
 
 NAME="backup-script"
-HOST=`hostname`
+HOST=`hostname -f`
 TMP=`mktemp /tmp/$NAME.XXXXXXXX` || exit 1
 LOGFILE="/var/log/backup-script.log"
 DELIMITER="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
