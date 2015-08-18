@@ -161,4 +161,5 @@ definition files are automatically mapped to the new backup-script variables:
 - 4: PID-file exists!
 - 5: Pre-exec command failed!
 - 6: There have been systems with errors!
+- 7: Not all jobs were run!
 - 9: Aborted (CTRL-C)!

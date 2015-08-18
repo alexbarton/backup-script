@@ -639,6 +639,8 @@ if [ $count_started -ne $count_ok ]; then
 	echo "----->  THERE HAVE BEEN ERRORS!  <-----"
 	echo
 	exit 6
+elif [ $count_all -ne $count_started ]; then
+	exit 7
 fi
 
 # -eof-
