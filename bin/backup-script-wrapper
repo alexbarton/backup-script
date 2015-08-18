@@ -38,13 +38,16 @@ echo
 
 if [ -w "$LOGFILE" ]; then
 	"$(dirname "$0")/backup-script" "$@" | tee -a "$LOGFILE"
+	r=${PIPESTATUS[0]}
 else
 	"$(dirname "$0")/backup-script" "$@"
+	r=$?
 	echo "(Can't write logfile: \"$LOGFILE\"!)"
 fi
 
 cat "$TMP" | mail -s "$HOST: $NAME results" "$MAILTO"
 
 rm -f "$TMP"
+exit $r
 
 # -eof-
