@@ -24,6 +24,7 @@ NAME="backup-script"
 HOST=`hostname`
 TMP=`mktemp /tmp/$NAME.XXXXXXXX` || exit 1
 LOGFILE="/var/log/backup-script.log"
+DELIMITER="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 
 PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 export PATH
@@ -36,7 +37,8 @@ echo " - Host: `hostname -f`"
 echo " - User: `id -un`"
 echo
 
-if [ -w "$LOGFILE" ]; then
+if echo "$DELIMITER" >>"$LOGFILE" 2>/dev/null; then
+	echo >>"$LOGFILE"
 	"$(dirname "$0")/backup-script" "$@" | tee -a "$LOGFILE"
 	r=${PIPESTATUS[0]}
 else
