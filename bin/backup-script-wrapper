@@ -23,6 +23,7 @@ fi
 NAME="backup-script"
 HOST=`hostname`
 TMP=`mktemp /tmp/$NAME.XXXXXXXX` || exit 11
+LOGFILE="/var/log/backup-script.log"
 
 PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 export PATH
@@ -35,7 +36,12 @@ echo " - Host: `hostname -f`"
 echo " - User: `id -un`"
 echo
 
-"$(dirname "$0")/backup-script" "$@"
+if [ -w "$LOGFILE" ]; then
+	"$(dirname "$0")/backup-script" "$@" | tee -a "$LOGFILE"
+else
+	"$(dirname "$0")/backup-script" "$@"
+	echo "(Can't write logfile: \"$LOGFILE\"!)"
+fi
 
 cat "$TMP" | mail -s "$HOST: $NAME results" "$MAILTO"
 
