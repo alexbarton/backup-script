@@ -13,6 +13,7 @@
 NAME=`basename $0`
 PIDFILE="/var/run/backup-script.pid"
 QUICK=0
+ONLY_LATEST=0
 
 export LC_ALL=C
 
@@ -80,6 +81,12 @@ Check_Stamp() {
 	fi
 }
 
+Snapshot_Info() {
+	echo "  - Snapshot: $1"
+	Check_Size "$1" "  "
+	Check_Stamp "$1/.stamp" "  "
+}
+
 if [ "$1" == "-r" -o "$1" == "--running" ]; then
 	pid="$(cat "$PIDFILE" 2>/dev/null)"
 	if [ -n "$pid" ]; then
@@ -99,6 +106,9 @@ fi
 
 while [ $# -gt 0 ]; do
 	case "$1" in
+		"--latest"|"-l")
+			ONLY_LATEST=1
+			;;
 		"--quick"|"-q")
 			QUICK=1
 			;;
@@ -154,13 +164,16 @@ for f in $sys; do
 	echo "- Target: $target"
 
 	if [ $generations -gt 0 ]; then
-		for s in $target/[0-9]*-[0-9]* $target/current; do
-			[ -e "$s" ] || continue
-			echo "  - Snapshot: $s"
-			Check_Size "$s" "  "
-			Check_Stamp "$s/.stamp" "  "
+		if [ "$ONLY_LATEST" = "0" ]; then
+			for s in $target/[0-9]*-[0-9]* $target/current; do
+				[ -e "$s" ] || continue
+				Snapshot_Info "$s"
+				snapshots=$snapshots+1
+			done
+		elif [ -e "$target/latest" ]; then
+			Snapshot_Info "$target/latest"
 			snapshots=$snapshots+1
-		done
+		fi
 	else
 		# Timestamp and result code
 		Check_Size "$target"
