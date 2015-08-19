@@ -39,6 +39,12 @@ for conf in \
 	fi
 done
 
+Usage() {
+	echo "Usage: $NAME [-q|--quick] [<system> [<system> [...]]]"
+	echo "       $NAME {-r|--running}"
+	exit 2
+}
+
 Check_Size() {
 	# $1: directory
 	# $2: padding
@@ -91,18 +97,19 @@ if [ "$1" == "-r" -o "$1" == "--running" ]; then
 	exit 1
 fi
 
-if [ "$1" == "-q" ]; then
-	QUICK=1
+while [ $# -gt 0 ]; do
+	case "$1" in
+		"--quick"|"-q")
+			QUICK=1
+			;;
+		"-"*)
+			Usage
+			;;
+		*)
+			break
+	esac
 	shift
-fi
-
-case "$1" in
-    "-"*)
-	echo "Usage: $NAME [-q] [<system> [<system> [...]]]"
-	echo "       $NAME {-r|--running}"
-	exit 2
-	;;
-esac
+done
 
 if [ $# -ge 1 ]; then
 	for s in "$@"; do
