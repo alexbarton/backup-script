@@ -52,8 +52,7 @@ Usage() {
 	echo
 	echo "When no <system> is given, all defined systems are used."
 	echo
-	echo "Configuration file is \"$conf\","
-	echo "using \"$conf_d\" as configuration directory."
+	echo -e $config_info
 	echo
 	exit 2
 }
@@ -273,6 +272,15 @@ for conf in \
 	[ -r "$conf" ] && break
 done
 
+# Read in configuration file
+config_info="Configuration file is \"$conf\""
+if [ -r "$conf" ]; then
+	source "$conf"
+else
+	config_info="${config_info} (not readable, using defaults)"
+fi
+config_info="${config_info},\nusing \"$conf_d\" as configuration directory."
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 	  "-n"|"--dry-run")
@@ -292,14 +300,7 @@ done
 trap GotSignal SIGINT
 
 echo -n "Started: "; date
-
-# Read in configuration file
-if [ -r "$conf" ]; then
-	echo "Reading configuration: \"$conf\" ..."
-	source "$conf"
-else
-	echo "No configuration file found, using defaults."
-fi
+echo -e $config_info
 echo
 
 if [ $# -ge 1 ]; then
