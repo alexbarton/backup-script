@@ -619,10 +619,27 @@ done
 
 sync
 
-paths=$( echo $destinations | sed -e 's/ /\n/g' | sort | uniq )
-if [ "$DRYRUN" -eq 0 -a -n "$paths" ]; then
-	df -h $paths
-	echo
+if [ "$DRYRUN" -eq 0 ]; then
+	paths=""
+	paths_zfs=""
+	for dest in $(echo $destinations | sed -e 's/ /\n/g' | sort | uniq); do
+		fs=$(GetFS "$dest")
+		case $fs in
+		  "zfs" )
+			paths_zfs="$paths_zfs $dest"
+			;;
+		  *)
+			paths="$paths $dest"
+		esac
+	done
+	if [ -n "$paths" ]; then
+		df -h $paths
+		echo
+	fi
+	if [ -n "$paths_zfs" ]; then
+		zfs list $paths_zfs
+		echo
+	fi
 fi
 
 CleanUp
