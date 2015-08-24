@@ -24,7 +24,7 @@ declare -i snapshots=0
 [ -d "/usr/local/etc/backup-script.d" ] \
 	&& conf_d="/usr/local/etc/backup-script.d" \
 	|| conf_d="/etc/backup-script.d"
-default_target=""
+default_target="/var/backups"
 default_generations=0
 
 # Search configuration file (last one is used as default!)
