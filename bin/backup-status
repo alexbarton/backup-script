@@ -133,8 +133,6 @@ else
 	sys="${conf_d}/"*
 fi
 
-[ -r "${conf_d}/backup-script.conf" ] && source "${conf_d}/backup-script.conf"
-
 for f in $sys; do
 	[ -r "$f" -a -f "$f" ] || continue
 
