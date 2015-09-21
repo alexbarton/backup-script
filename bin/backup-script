@@ -531,10 +531,21 @@ for f in $sys; do
 	cmd="$cmd --delete --delete-excluded --sparse"
 	[ "$VERBOSE" -gt 0 ] && cmd="$cmd --progress"
 	if [ "$source_root" = "$default_source_root" ]; then
-		cmd="$cmd --exclude=/dev --exclude=/proc --exclude=/sys"
-		cmd="$cmd --exclude=/run --exclude=/tmp --exclude=/var/tmp"
-		cmd="$cmd --exclude=/media --exclude=/mnt --exclude=/net"
-		cmd="$cmd --exclude=/var/cache/apt --exclude=/var/log"
+		for dir in \
+			/dev \
+			/media \
+			/mnt \
+			/net \
+			/proc \
+			/run \
+			/sys \
+			/tmp \
+			/var/cache/apt \
+			/var/log \
+			/var/tmp \
+		; do
+			cmd="$cmd --exclude=$dir"
+		done
 	fi
 	[ -n "$exclude_args_add" ] && cmd="$cmd $exclude_args_add"
 	for dir in $exclude_dirs_add; do
