@@ -532,17 +532,17 @@ for f in $sys; do
 	[ "$VERBOSE" -gt 0 ] && cmd="$cmd --progress"
 	if [ "$source_root" = "$default_source_root" ]; then
 		for dir in \
-			/dev \
-			/media \
-			/mnt \
-			/net \
-			/proc \
-			/run \
-			/sys \
-			/tmp \
-			/var/cache/apt \
-			/var/log \
-			/var/tmp \
+			"/dev/**" \
+			"/media/**" \
+			"/mnt/**" \
+			"/net/**" \
+			"/proc/**" \
+			"/run/**" \
+			"/sys/**" \
+			"/tmp/**" \
+			"/var/cache/apt/**" \
+			"/var/log/**" \
+			"/var/tmp/**" \
 		; do
 			cmd="$cmd --exclude=$dir"
 		done
