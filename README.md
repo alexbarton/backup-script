@@ -103,6 +103,13 @@ Additional parameters for `rsync`. Default: none.
 
 Additional (exclude) parameters for `rsync`. Default: none.
 
+*Deprecated! Use "exclude_dirs_add" instead!*
+
+### [default_]exclude_dirs_add
+
+Additional directory path names to exclude from the backup. Use full path names
+separated by spaces. Default: none.
+
 ### [default_]compress
 
 Enable (1) or disable (0) compression. Default: 1 (on).

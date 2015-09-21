@@ -37,6 +37,7 @@ default_user="root"
 default_ssh_args_add=""
 default_rsync_args_add=""
 default_exclude_args_add=""
+default_exclude_dirs_add=""
 default_compress=1
 default_ping=1
 default_local=0
@@ -363,6 +364,7 @@ for f in $sys; do
 	ssh_args_add="$default_ssh_args_add"
 	rsync_args_add="$default_rsync_args_add"
 	exclude_args_add="$default_exclude_args_add"
+	exclude_dirs_add="$default_exclude_dirs_add"
 	compress="$default_compress"
 	ping="$default_ping"
 	local="$default_local"
@@ -535,6 +537,9 @@ for f in $sys; do
 		cmd="$cmd --exclude=/var/cache/apt --exclude=/var/log"
 	fi
 	[ -n "$exclude_args_add" ] && cmd="$cmd $exclude_args_add"
+	for dir in $exclude_dirs_add; do
+		cmd="$cmd --exclude=$dir"
+	done
 	[ -n "$rsync_args_add" ] && cmd="$cmd $rsync_args_add"
 
 	[ "$local" -eq 0 ] \
