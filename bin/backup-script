@@ -298,11 +298,24 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
-trap GotSignal SIGINT
-
 echo -n "Started: "; date
 echo -e $config_info
+
+# Check rsync and its protocol version
+rsync=$(which "rsync" 2>/dev/null)
+if [ $? -ne 0 ]; then
+	echo "Failed to detect rsync(1)! Is it installed in your \$PATH?"
+	exit 1
+fi
+rsync_proto=$($rsync --version 2>/dev/null | head -n 1 | sed 's/.*  protocol version \([0-9]*\)$/\1/')
+if [ $? -ne 0 ]; then
+	echo "Failed to detect protocol version of $rsync!"
+	exit 1
+fi
+echo "Rsync command is $rsync, protocol version $rsync_proto."
 echo
+
+trap GotSignal SIGINT
 
 if [ $# -ge 1 ]; then
 	for s in "$@"; do
@@ -525,7 +538,7 @@ for f in $sys; do
 	fi
 
 	# prepare (remote) command ...
-	cmd="rsync --archive"
+	cmd="$rsync --archive"
 	[ "$compress" -ne 0 ] && cmd="$cmd --compress"
 	[ "$local" -eq 0 ] && cmd="$cmd --rsh=\"$ssh_cmd\""
 	cmd="$cmd --delete --delete-excluded --sparse"
