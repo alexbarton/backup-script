@@ -156,7 +156,7 @@ CloneSubvolume() {
 		zfs snapshot "$snapshot" || return 1
 		link_name="$(echo "$snapshot" | cut -d@ -f2-)"
 		ln -s \
-			"$volume/.zfs/snapshot/$link_name" \
+			"current/.zfs/snapshot/$link_name" \
 			"$(dirname "$volume")/$link_name"
 		;;
 	  *)
