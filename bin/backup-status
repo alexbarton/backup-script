@@ -41,7 +41,7 @@ for conf in \
 done
 
 Usage() {
-	echo "Usage: $NAME [-q|--quick] [<system> [<system> [...]]]"
+	echo "Usage: $NAME [-l|--latest] [-q|--quick] [<system> [<system> [...]]]"
 	echo "       $NAME {-r|--running}"
 	exit 2
 }
