@@ -13,6 +13,7 @@
 NAME=`basename $0`
 PIDFILE="/var/run/backup-script.pid"
 QUICK=0
+ONLY_ERRORS=0
 ONLY_LATEST=0
 
 export LC_ALL=C
@@ -44,6 +45,7 @@ Usage() {
 	echo "Usage: $NAME [--errors|--latest] [--quick] [<system> [<system> [...]]]"
 	echo "       $NAME --running"
 	echo
+	echo "  --errors, -e    Only show current backups with errors (implies \"--latest\")."
 	echo "  --latest, -l    Only show latest backup generations."
 	echo "  --quick, -q     Don't calculate backup sizes."
 	echo "  --running, -r   Check if an \"backup-script\" task is currently running."
@@ -92,6 +94,13 @@ Snapshot_Info() {
 	Check_Stamp "$1/.stamp" "  "
 }
 
+Get_Result_Code() {
+	code=1
+	[ -r "$1" ] && source "$1"
+	[ -z "$code" ] && code=1
+	echo $code
+}
+
 if [ "$1" == "-r" -o "$1" == "--running" ]; then
 	pid="$(cat "$PIDFILE" 2>/dev/null)"
 	if [ -n "$pid" ]; then
@@ -111,6 +120,10 @@ fi
 
 while [ $# -gt 0 ]; do
 	case "$1" in
+		"--errors"|"-e")
+			ONLY_ERRORS=1
+			ONLY_LATEST=1
+			;;
 		"--latest"|"-l")
 			ONLY_LATEST=1
 			;;
@@ -159,6 +172,13 @@ for f in $sys; do
 	target="$target/$(basename "$f")"
 
 	[ -d "$target" ] || continue
+
+	if [ "$ONLY_ERRORS" != "0" ]; then
+		[ $generations -gt 0 ] \
+			&& result=$(Get_Result_Code "$target/latest/.stamp") \
+			|| result=$(Get_Result_Code "$target/.stamp")
+		[ $result -eq 0 -o $result -eq 24 ] && continue
+	fi
 
 	# System name
 	[ "$system" = "$fname" ] && echo "$fname" || echo "$fname [$system]"
