@@ -41,8 +41,13 @@ for conf in \
 done
 
 Usage() {
-	echo "Usage: $NAME [-l|--latest] [-q|--quick] [<system> [<system> [...]]]"
-	echo "       $NAME {-r|--running}"
+	echo "Usage: $NAME [--errors|--latest] [--quick] [<system> [<system> [...]]]"
+	echo "       $NAME --running"
+	echo
+	echo "  --latest, -l    Only show latest backup generations."
+	echo "  --quick, -q     Don't calculate backup sizes."
+	echo "  --running, -r   Check if an \"backup-script\" task is currently running."
+	echo
 	exit 2
 }
 
