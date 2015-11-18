@@ -299,7 +299,7 @@ while [ $# -gt 0 ]; do
 done
 
 echo -n "Started: "; date
-echo -e $config_info
+echo -e "$config_info"
 
 # Check rsync and its protocol version
 rsync=$(which "rsync" 2>/dev/null)
@@ -390,7 +390,7 @@ for f in $sys; do
 	post_exec_saved="$post_exec"
 
 	# Compatibility with backup-pull(1) script: Set defaults
-	unset host
+	host=""
 	unset source
 	unset pre_exec
 	unset post_exec
