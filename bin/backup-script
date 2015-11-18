@@ -31,6 +31,7 @@ destinations=""
 	|| conf_d="/etc/backup-script.d"
 pre_exec=""
 post_exec=""
+default_backup_type="rsync"
 default_source_root="/"
 default_target="/var/backups"
 default_user="root"
@@ -371,6 +372,7 @@ for f in $sys; do
 
 	# Set global defaults
 	system="$fname"
+	backup_type="$default_backup_type"
 	user="$default_user"
 	source_root="$default_source_root"
 	target="$default_target"
@@ -538,41 +540,46 @@ for f in $sys; do
 	fi
 
 	# prepare (remote) command ...
-	cmd="$rsync --archive"
-	[ "$compress" -ne 0 ] && cmd="$cmd --compress"
-	[ "$local" -eq 0 ] && cmd="$cmd --rsh=\"$ssh_cmd\""
-	cmd="$cmd --delete --delete-excluded --sparse"
-	if [ "$VERBOSE" -gt 0 ]; then
-		[ "$rsync_proto" -ge 31 ] \
-			&& cmd="$cmd --info=progress2" \
-			|| cmd="$cmd --progress"
-	fi
-	if [ "$source_root" = "$default_source_root" ]; then
-		for dir in \
-			"/dev/**" \
-			"/media/**" \
-			"/mnt/**" \
-			"/net/**" \
-			"/proc/**" \
-			"/run/**" \
-			"/sys/**" \
-			"/tmp/**" \
-			"/var/cache/apt/**" \
-			"/var/log/**" \
-			"/var/tmp/**" \
-		; do
+	if [[ "$backup_type" == "rsync" ]]; then
+		cmd="$rsync --archive"
+		[ "$compress" -ne 0 ] && cmd="$cmd --compress"
+		[ "$local" -eq 0 ] && cmd="$cmd --rsh=\"$ssh_cmd\""
+		cmd="$cmd --delete --delete-excluded --sparse"
+		if [ "$VERBOSE" -gt 0 ]; then
+			[ "$rsync_proto" -ge 31 ] \
+				&& cmd="$cmd --info=progress2" \
+				|| cmd="$cmd --progress"
+		fi
+		if [ "$source_root" = "$default_source_root" ]; then
+			for dir in \
+				"/dev/**" \
+				"/media/**" \
+				"/mnt/**" \
+				"/net/**" \
+				"/proc/**" \
+				"/run/**" \
+				"/sys/**" \
+				"/tmp/**" \
+				"/var/cache/apt/**" \
+				"/var/log/**" \
+				"/var/tmp/**" \
+			; do
+				cmd="$cmd --exclude=$dir"
+			done
+		fi
+		[ -n "$exclude_args_add" ] && cmd="$cmd $exclude_args_add"
+		for dir in $exclude_dirs_add; do
 			cmd="$cmd --exclude=$dir"
 		done
-	fi
-	[ -n "$exclude_args_add" ] && cmd="$cmd $exclude_args_add"
-	for dir in $exclude_dirs_add; do
-		cmd="$cmd --exclude=$dir"
-	done
-	[ -n "$rsync_args_add" ] && cmd="$cmd $rsync_args_add"
+		[ -n "$rsync_args_add" ] && cmd="$cmd $rsync_args_add"
 
-	[ "$local" -eq 0 ] \
-		&& cmd="$cmd ${user}@${system}:$source_root $sys_target/" \
-		|| cmd="$cmd $source_root $sys_target/"
+		[ "$local" -eq 0 ] \
+			&& cmd="$cmd ${user}@${system}:$source_root $sys_target/" \
+			|| cmd="$cmd $source_root $sys_target/"
+	else
+		echo "Backup type \"$backup_type\" undefined, \"$system\" skipped!"
+		echo; continue
+	fi
 
 	echo "Backing up to \"$sys_target\" ..."
 	echo -n "Start date: "; date
