@@ -33,6 +33,7 @@ pre_exec=""
 post_exec=""
 default_backup_type="rsync"
 default_source_root="/"
+default_files="running-config"
 default_target="/var/backups"
 default_user="root"
 default_ssh_args_add=""
@@ -375,6 +376,7 @@ for f in $sys; do
 	backup_type="$default_backup_type"
 	user="$default_user"
 	source_root="$default_source_root"
+	files="$default_files"
 	target="$default_target"
 	ssh_args_add="$default_ssh_args_add"
 	rsync_args_add="$default_rsync_args_add"
@@ -576,6 +578,12 @@ for f in $sys; do
 		[ "$local" -eq 0 ] \
 			&& cmd="$cmd ${user}@${system}:$source_root $sys_target/" \
 			|| cmd="$cmd $source_root $sys_target/"
+	elif [[ "$backup_type" == "scp" ]]; then
+		cmd="scp"
+		[ "$VERBOSE" -eq 0 ] && cmd="$cmd -q"
+		for file in $files; do
+			cmd="$cmd ${user}@${system}:$file $sys_target/"
+		done
 	else
 		echo "Backup type \"$backup_type\" undefined, \"$system\" skipped!"
 		echo; continue

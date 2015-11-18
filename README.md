@@ -72,6 +72,22 @@ System host name. Default: file name.
 
 *Note:* There is no `default_system` variable!
 
+### [default_]backup_type
+
+Backup type to use. Default: `rsync`.
+
+- `rsync`: system backup using rsync(1).
+  Use `source_root` to specify the root directory to save.
+
+- `scp`: file backup using scp(1).
+  Use `files` to specify the files to copy.
+
+Please note that neither `ssh_args_add`, `rsync_args_add`, `compress`, nor any
+"exclude" parameters are supported when using the "scp" backup type! And There
+"scp" backup type never _deletes_ files from the backup store; so if you reduce
+the list of files to backup, old files will still be kept, because they were
+already saved in an older generation (but no longer updated).
+
 ### [default_]user
 
 Remote user. Default: `root`.
@@ -82,6 +98,11 @@ Remote *root* directory, must end with a slash ("/") character! Default: "/".
 
 When saving the whole (remote) system ("/"), default excludes are set up
 automatically, which exclude standard system directories like /sys and /proc.
+
+### [default_]file
+
+Space separated list of files to copy when using the "scp" `backup_type`.
+Default: "running-config".
 
 ### [default_]target
 
@@ -112,7 +133,7 @@ separated by spaces. Default: none.
 
 ### [default_]compress
 
-Enable (1) or disable (0) compression. Default: 1 (on).
+Enable (1) or disable (0) rsync transfer compression. Default: 1 (on).
 
 ### [default_]ping
 
