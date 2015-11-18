@@ -360,7 +360,7 @@ if [ -n "$pre_exec" ]; then
 fi
 
 for f in $sys; do
-	[ -r "$f" -a -f "$f" ] || continue
+	[[ -r "$f" && -f "$f" ]] || continue
 
 	fname=$(basename "$f")
 	case "$fname" in
@@ -399,13 +399,13 @@ for f in $sys; do
 	source "$f"
 
 	# Compatibility with backup-pull(1) script: Fix up configuration
-	[ "$system" = "$fname" -a -n "$host" ] \
+	[[ "$system" = "$fname" && -n "$host" ]] \
 		&& system="$host"
-	[ "$source_root" = "$default_source_root" -a -n "$source" ] \
+	[[ "$source_root" = "$default_source_root" && -n "$source" ]] \
 		&& source_root="$source"
-	[ -z "$job_pre_exec" -a -n "$pre_exec" ] \
+	[[ -z "$job_pre_exec" && -n "$pre_exec" ]] \
 		&& job_pre_exec="$pre_exec"
-	[ -z "$job_post_exec" -a -n "$post_exec" ] \
+	[[ -z "$job_post_exec" && -n "$post_exec" ]] \
 		&& job_post_exec="$post_exec"
 
 	# Compatibility with backup-pull(1) script: Restore global values ...
@@ -413,7 +413,7 @@ for f in $sys; do
 	post_exec="$post_exec_saved"
 
 	# Validate configuration
-	if [ "$system" = "localhost" -o "$system" = "127.0.0.1" ]; then
+	if [[ "$system" = "localhost" || "$system" = "127.0.0.1" ]]; then
 		# Local system
 		local=1
 		compress=0
@@ -455,7 +455,7 @@ for f in $sys; do
 
 	sys_target="$target/$fname"
 	sys_root="$sys_target"
-	if [ "$DRYRUN" -eq 0 -a ! -e "$sys_target" ]; then
+	if [[ "$DRYRUN" -eq 0 && ! -e "$sys_target" ]]; then
 		if [ $generations -gt 0 ]; then
 			CreateSubvolume "$sys_target"
 		else
@@ -467,7 +467,7 @@ for f in $sys; do
 		fi
 	fi
 
-	if [ "$local" -eq 0 -a "$ping" -ne 0 ]; then
+	if [[ "$local" -eq 0 && "$ping" -ne 0 ]]; then
 		# Check if system is alive
 		ping -c 1 "$system" >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
@@ -488,7 +488,7 @@ for f in $sys; do
 
 		Initialize_Last_SysTarget_Snapshot "$sys_target" || continue
 
-		if [ -n "$last" -a ! -e "$last/.stamp" ]; then
+		if [[ -n "$last" && ! -e "$last/.stamp" ]]; then
 			# Old backup directory without "stamp file", continue
 			echo "Found incomplete snapshot in \"$last\", reusing and renaming it ..."
 			RenameSubvolume "$last" "$sys_target"
@@ -595,7 +595,7 @@ for f in $sys; do
 	fi
 
 	echo -n "End date: "; date
-	if [ $ret -eq 0 -o $ret -eq 24 ]; then
+	if [[ $ret -eq 0 || $ret -eq 24 ]]; then
 		[ $ret -eq 24 ] && count_ok_vanished=$count_ok_vanished+1
 
 		echo "System \"$system\" completed with status $ret, OK."
@@ -619,7 +619,7 @@ for f in $sys; do
 		# Clean up old generations
 		declare -i gen_count=$generations+2
 		to_delete=$(ls -1t "$sys_root" 2>/dev/null | tail -n+$gen_count | sort)
-		if [ -n "$to_delete" -a $ok -eq 1 ]; then
+		if [[ -n "$to_delete" && $ok -eq 1 ]]; then
 			[ "$DRYRUN" -eq 0 ] \
 				&& echo "Deleting old backup generations (keep $generations) ..." \
 				|| echo " *** Trial run, not deleting old generations:"
