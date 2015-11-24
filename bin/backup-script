@@ -596,9 +596,20 @@ for f in $sys; do
 	ok=0
 
 	if [ "$DRYRUN" -eq 0 ]; then
-		rm -f "$sys_target/.stamp"
+		stamp_file="$sys_target/.stamp"
+		rm -f "$stamp_file"
+
+		# Execute backup command:
+		start_t=$(date "+%s")
 		$SHELL -c "$cmd"; ret=$?
-		echo "code=$ret" >"$sys_target/.stamp"
+		end_t=$(date "+%s")
+
+		echo "code=$ret" >"$stamp_file"
+		echo "start_t=$start_t" >>"$stamp_file"
+		echo "end_t=$end_t" >>"$stamp_file"
+		echo "cmd='$cmd'" >>"$stamp_file"
+		echo "backup_host='`hostname -f`'" >>"$stamp_file"
+		echo "backup_user='`id -un`'" >>"$stamp_file"
 	else
 		echo " *** Trial run, not executing save command!"
 		ret=0
