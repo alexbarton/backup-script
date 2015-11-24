@@ -208,12 +208,17 @@ for f in $sys; do
 	echo
 done
 
+if [ "$ONLY_ERRORS" != "0" ]; then
+	status="failed "; p0="."; pN="!"
+else
+	status=""; p0="!"; pN="."
+fi
 if [ $count -lt 1 ]; then
-	echo "No backups found!"
+	echo "No ${status}backups found${p0}"
 	exit 1
 fi
 [ $count -eq 1 ] && sc="" || sc="s"
 [ $snapshots -eq 1 ] && ss="" || ss="s"
-echo "$count system backup$sc found, $snapshots snapshot$ss."
+echo "$count ${status}system backup$sc found, $snapshots snapshot$ss${pN}"
 
 # -eof-
