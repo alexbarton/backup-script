@@ -126,7 +126,7 @@ Check_Stamp() {
 		  24)	txt=", WARNING (some files vanished during backup)"; ;;
 		  *)	txt=", ERROR"
 		esac
-		[ $code -gt 0 ] && echo "$2  - Result code: ${code}${txt}"
+		[ $code -ge 0 ] && echo "$2  - Result code: ${code}${txt}"
 	else
 		echo "$2  - No timestamp recorded! Backup currently running or aborted?"
 	fi
