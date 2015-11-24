@@ -68,21 +68,65 @@ Check_Stamp() {
 	# $2: padding
 
 	if [ -f "$1" ]; then
-		if [ "$(uname)" = "Linux" ]; then
-			last=`LC_ALL=C stat "$1" | grep "^Modify: " \
-			 | cut -d':' -f2- | cut -d. -f1`
-		else
-			last=`LC_ALL=C stat -f "%Sc" "$1"`
-		fi
-		[ -n "$last" ] && echo "$2  - Date:" $last
-		code=
+		declare -i code=-1
+		declare -i start_t=-1
+		start=""
+		declare -i end_t=-1
+		end=""
+		declare -i duration_t=-1
+
+		# Read in "stamp file"
 		source "$1"
+
+		if [ $start_t -gt 0 ] && [ $end_t -gt 0 ]; then
+			if [ "$(uname)" = "Linux" ]; then
+				start=$(date -d @"$start_t")
+				end=$(date -d @"$end_t")
+			else
+				start=$(date -r "$start_t")
+				end=$(date -r "$end_t")
+			fi
+			duration_t=$end_t-$start_t
+		else
+			if [ "$(uname)" = "Linux" ]; then
+				end=`LC_ALL=C stat "$1" | grep "^Modify: " \
+				 | cut -d':' -f2- | cut -d. -f1`
+			else
+				end=`LC_ALL=C stat -f "%Sc" "$1"`
+			fi
+		fi
+		[ -n "$start" ] && echo "$2  - Start date:" $start
+		[ -n "$end" ] && echo "$2  - End date:" $end
+		if [ $duration_t -gt -1 ]; then
+			declare -i s=$duration_t
+			if [ $s -ge 60 ]; then
+				declare -i m=$(($s/60))
+				declare -i s=$(($s%60))
+				if [ $m -ge 60 ]; then
+					declare -i h=$(($m/60))
+					declare -i m=$(($m%60))
+					if [ $h -ge 24 ]; then
+						declare -i d=$(($h/24))
+						declare -i h=$(($h%24))
+						duration="${d}d${h}h${m}m${s}s"
+					else
+						duration="${h}h${m}m${s}s"
+					fi
+				else
+					duration="${m}m${s}s"
+				fi
+			else
+				duration="${s}s"
+			fi
+			echo "$2  - Duration:" $duration
+		fi
+
 		case "$code" in
 		  0)	txt=", OK"; ;;
 		  24)	txt=", WARNING (some files vanished during backup)"; ;;
 		  *)	txt=", ERROR"
 		esac
-		[ -n "$code" ] && echo "$2  - Result code: $code$txt"
+		[ $code -gt 0 ] && echo "$2  - Result code: ${code}${txt}"
 	else
 		echo "$2  - No timestamp recorded! Backup currently running or aborted?"
 	fi
