@@ -600,7 +600,7 @@ for f in $sys; do
 		$SHELL -c "$cmd"; ret=$?
 		echo "code=$ret" >"$sys_target/.stamp"
 	else
-		echo " *** Trial run, not executing synchronization command!"
+		echo " *** Trial run, not executing save command!"
 		ret=0
 	fi
 
