@@ -668,7 +668,7 @@ for f in $sys; do
 		elif [ -n "$to_delete" ]; then
 			echo "There have been errors, not cleaning up old generations!"
 		else
-			echo "Nothing to clean up."
+			echo "Nothing to clean up (keep up to $generations generations)."
 		fi
 	fi
 
