@@ -552,6 +552,7 @@ for f in $sys; do
 				&& cmd="$cmd --info=progress2" \
 				|| cmd="$cmd --progress"
 		fi
+		set -f
 		if [ "$source_root" = "$default_source_root" ]; then
 			for dir in \
 				"/dev/**" \
@@ -574,6 +575,7 @@ for f in $sys; do
 			cmd="$cmd --exclude=$dir"
 		done
 		[ -n "$rsync_args_add" ] && cmd="$cmd $rsync_args_add"
+		set +f
 
 		[ "$local" -eq 0 ] \
 			&& cmd="$cmd ${user}@${system}:$source_root $sys_target/" \
