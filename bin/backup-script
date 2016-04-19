@@ -15,6 +15,7 @@ PIDFILE="/var/run/$NAME.pid"
 
 DRYRUN=0
 VERBOSE=0
+TAG=""
 
 export LC_ALL=C
 
@@ -46,12 +47,14 @@ default_local=0
 default_generations=0
 default_job_pre_exec=""
 default_job_post_exec=""
+default_tags=""
 
 Usage() {
 	echo "Usage: $NAME [<options>] [<system> [<system> [...]]]"
 	echo
-	echo "  -p, --progress    Show progress, see rsync(1)."
-	echo "  -n, --dry-run     Test run only, don't copy any data."
+	echo "  -n, --dry-run       Test run only, don't copy any data."
+	echo "  -p, --progress      Show progress, see rsync(1)."
+	echo "  -t TAG, --tag TAG   Only run jobs with tag TAG."
 	echo
 	echo "When no <system> is given, all defined systems are used."
 	echo
@@ -292,6 +295,10 @@ while [ $# -gt 0 ]; do
 	  "-p"|"--progress")
 		VERBOSE=1; shift
 		;;
+	  "-t"|"--tag")
+		shift; TAG="$1"; shift
+		[ -n "$TAG" ] || Usage
+		;;
 	  "-"*)
 		Usage
 		;;
@@ -315,6 +322,8 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 echo "Rsync command is $rsync, protocol version $rsync_proto."
+
+[[ -n "$TAG" ]] && echo "Running jobs tagged with \"$TAG\"."
 echo
 
 trap GotSignal SIGINT
@@ -388,6 +397,7 @@ for f in $sys; do
 	generations="$default_generations"
 	job_pre_exec="$default_job_pre_exec"
 	job_post_exec="$default_job_post_exec"
+	tags="$default_tags"
 
 	# Compatibility with backup-pull(1) script: Save global values ...
 	pre_exec_saved="$pre_exec"
@@ -421,6 +431,22 @@ for f in $sys; do
 		# Local system
 		local=1
 		compress=0
+	fi
+
+	# Add "NONE" tag when no tags are given in the config file:
+	[[ -z "$tags" ]] && tags="NONE"
+	# Add "auto-tags":
+	[[ "$local" -eq 1 ]] && tags="$tags,LOCAL"
+	# Check tags
+	if [[ -n "$TAG" && "$TAG" != "ALL" ]]; then
+		echo "$tags" | grep -E "(^|,)$TAG(,|$)" >/dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			if [ "$DRYRUN" -ne 0 ]; then
+				echo "Tags of system \"$system\" don't match \"$TAG\": \"$tags\". Skipped."
+				echo
+			fi
+			continue
+		fi
 	fi
 
 	# Make sure "source" ends with a slash ("/")

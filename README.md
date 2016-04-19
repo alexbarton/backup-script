@@ -14,8 +14,9 @@ Usage: `backup-script [<options>] [<system> [<system> [...]]]`
 
 Options:
 
-- `-p`, `--progress`: Show progress, see rsync(1).
 - `-n`, `--dry-run`: Test run only, don't copy any data.
+- `-p`, `--progress`: Show progress, see rsync(1).
+- `-t TAG`, `--tag TAG`: Only run jobs with tag TAG (see "tags" variable below).
 
 When no *system* is given, all defined systems are backed up.
 
@@ -165,6 +166,17 @@ Supported file systems are:
 
 The latest snapshot is always reachable using a symlink named `latest`
 inside the system directory.
+
+### [default_]tags
+
+Comma-separated list of tags of this job. All uppercase tag names are reserved
+and become set automatically on runtime:
+
+- NONE: Jobs with no other tags at all.
+- ALL: Matches all jobs, regardless of their tags (see `-t`/`--tags` option).
+- LOCAL: All jobs running on "localhost".
+
+Default: NONE.
 
 ### [default_]job_pre_exec
 
