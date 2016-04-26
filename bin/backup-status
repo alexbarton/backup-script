@@ -36,6 +36,7 @@ for conf in \
 	"/usr/local/etc/backup-script.conf" \
 ; do
 	if [ -r "$conf" ]; then
+		# shellcheck source=/dev/null
 		source "$conf"
 		break
 	fi
@@ -76,6 +77,7 @@ Check_Stamp() {
 		declare -i duration_t=-1
 
 		# Read in "stamp file"
+		# shellcheck source=/dev/null
 		source "$1"
 
 		if [ $start_t -gt 0 ] && [ $end_t -gt 0 ]; then
@@ -140,12 +142,13 @@ Snapshot_Info() {
 
 Get_Result_Code() {
 	code=1
+	# shellcheck source=/dev/null
 	[ -r "$1" ] && source "$1"
 	[ -z "$code" ] && code=1
 	echo $code
 }
 
-if [ "$1" == "-r" -o "$1" == "--running" ]; then
+if [[ "$1" == "-r" || "$1" == "--running" ]]; then
 	pid="$(cat "$PIDFILE" 2>/dev/null)"
 	if [ -n "$pid" ]; then
 		if kill -0 "$pid" >/dev/null 2>&1; then
@@ -192,11 +195,11 @@ if [ $# -ge 1 ]; then
 		sys="$sys ${conf_d}/$s"
 	done
 else
-	sys="${conf_d}/"*
+	sys=("${conf_d}/"*)
 fi
 
-for f in $sys; do
-	[ -r "$f" -a -f "$f" ] || continue
+for f in "${sys[@]}"; do
+	[[ -r "$f" && -f "$f" ]] || continue
 
 	fname=`basename $f`
 	case "$fname" in
@@ -211,6 +214,7 @@ for f in $sys; do
 	generations="$default_generations"
 
 	# Read in system configuration file
+	# shellcheck source=/dev/null
 	source "$f"
 
 	target="$target/$(basename "$f")"
@@ -221,7 +225,7 @@ for f in $sys; do
 		[ $generations -gt 0 ] \
 			&& result=$(Get_Result_Code "$target/latest/.stamp") \
 			|| result=$(Get_Result_Code "$target/.stamp")
-		[ $result -eq 0 -o $result -eq 24 ] && continue
+		[[ $result -eq 0 || $result -eq 24 ]] && continue
 	fi
 
 	# System name

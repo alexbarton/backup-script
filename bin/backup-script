@@ -281,6 +281,7 @@ done
 # Read in configuration file
 config_info="Configuration file is \"$conf\""
 if [ -r "$conf" ]; then
+	# shellcheck source=/dev/null
 	source "$conf"
 else
 	config_info="${config_info} (not readable, using defaults)"
@@ -337,7 +338,7 @@ if [ $# -ge 1 ]; then
 		sys="$sys ${conf_d}/$s"
 	done
 else
-	sys="${conf_d}/"*
+	sys=("${conf_d}/"*)
 fi
 
 # check and create PID file
@@ -370,7 +371,7 @@ if [ -n "$pre_exec" ]; then
 	echo
 fi
 
-for f in $sys; do
+for f in "${sys[@]}"; do
 	[[ -r "$f" && -f "$f" ]] || continue
 
 	fname=$(basename "$f")
@@ -410,6 +411,7 @@ for f in $sys; do
 	unset post_exec
 
 	# Read in system configuration file
+	# shellcheck source=/dev/null
 	source "$f"
 
 	# Compatibility with backup-pull(1) script: Fix up configuration
