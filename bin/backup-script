@@ -451,12 +451,12 @@ for f in "${sys[@]}"; do
 		fi
 	fi
 
-	# Make sure "source" ends with a slash ("/")
-	case "$source" in
-	  "*/")
+	# Make sure "source_root" ends with a slash ("/")
+	case "$source_root" in
+	  *"/")
 		;;
-	  "*")
-		source="$source/"
+	  *)
+		source_root="$source_root/"
 	esac
 
 	# Make sure "target" DOESN'T end with a slash ("/")
