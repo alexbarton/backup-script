@@ -335,7 +335,7 @@ if [ $# -ge 1 ]; then
 			echo "$NAME: Can' read \"${conf_d}/$s\"!"
 			exit 3
 		fi
-		sys="$sys ${conf_d}/$s"
+		sys+=("${conf_d}/$s")
 	done
 else
 	sys=("${conf_d}/"*)
