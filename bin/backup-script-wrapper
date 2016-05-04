@@ -49,6 +49,9 @@ echo
 echo " - Host: `hostname -f`"
 echo " - User: `id -un`"
 echo
+echo "Command:"
+echo "$0" "$@"
+echo
 
 if echo "$DELIMITER" >>"$LOGFILE" 2>/dev/null; then
 	echo >>"$LOGFILE"
