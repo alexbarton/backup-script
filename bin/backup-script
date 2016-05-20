@@ -571,7 +571,7 @@ for f in "${sys[@]}"; do
 
 	# prepare (remote) command ...
 	if [[ "$backup_type" == "rsync" ]]; then
-		cmd="$rsync --archive"
+		cmd="$rsync --archive --timeout=900"
 		[ "$compress" -ne 0 ] && cmd="$cmd --compress"
 		[ "$local" -eq 0 ] && cmd="$cmd --rsh=\"$ssh_cmd\""
 		cmd="$cmd --delete-during --delete-excluded --sparse"
