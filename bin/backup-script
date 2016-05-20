@@ -574,7 +574,7 @@ for f in "${sys[@]}"; do
 		cmd="$rsync --archive"
 		[ "$compress" -ne 0 ] && cmd="$cmd --compress"
 		[ "$local" -eq 0 ] && cmd="$cmd --rsh=\"$ssh_cmd\""
-		cmd="$cmd --delete --delete-excluded --sparse"
+		cmd="$cmd --delete-during --delete-excluded --sparse"
 		if [ "$VERBOSE" -gt 0 ]; then
 			[ "$rsync_proto" -ge 31 ] \
 				&& cmd="$cmd --info=progress2" \
