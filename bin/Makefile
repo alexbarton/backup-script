@@ -14,3 +14,7 @@ install-local:
 	 $(DESTDIR)$(PREFIX)/sbin/backup-script-wrapper
 	install -o $(USER) -g $(GROUP) -m 755 backup-status \
 	 $(DESTDIR)$(PREFIX)/sbin/backup-status
+
+check-local:
+	./backup-script --help | fgrep 'Usage' >/dev/null
+	./backup-script --help | fgrep 'Configuration file' >/dev/null
