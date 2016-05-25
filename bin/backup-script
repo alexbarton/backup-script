@@ -45,6 +45,7 @@ default_compress=1
 default_ping=1
 default_local=0
 default_generations=0
+default_io_timeout="1800"
 default_job_pre_exec=""
 default_job_post_exec=""
 default_tags=""
@@ -399,6 +400,7 @@ for f in "${sys[@]}"; do
 	job_pre_exec="$default_job_pre_exec"
 	job_post_exec="$default_job_post_exec"
 	tags="$default_tags"
+	io_timeout="$default_io_timeout"
 
 	# Compatibility with backup-pull(1) script: Save global values ...
 	pre_exec_saved="$pre_exec"
@@ -571,7 +573,7 @@ for f in "${sys[@]}"; do
 
 	# prepare (remote) command ...
 	if [[ "$backup_type" == "rsync" ]]; then
-		cmd="$rsync --archive --timeout=900"
+		cmd="$rsync --archive --timeout=$io_timeout"
 		[ "$compress" -ne 0 ] && cmd="$cmd --compress"
 		[ "$local" -eq 0 ] && cmd="$cmd --rsh=\"$ssh_cmd\""
 		cmd="$cmd --delete-during --delete-excluded --sparse"

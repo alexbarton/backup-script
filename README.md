@@ -167,6 +167,11 @@ Supported file systems are:
 The latest snapshot is always reachable using a symlink named `latest`
 inside the system directory.
 
+### [default_]io_timeout
+
+The maximum I/O timeout in seconds. If no data is transferred for the specified
+time then rsync will abort. Default: 1800 (30 minutes).
+
 ### [default_]tags
 
 Comma-separated list of tags of this job. All uppercase tag names are reserved
