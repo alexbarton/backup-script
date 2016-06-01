@@ -83,6 +83,9 @@ Backup type to use. Default: `rsync`.
 - `scp`: file backup using scp(1).
   Use `files` to specify the files to copy.
 
+- `disabled`: job is disabled and will not be run. This becomes accounted as
+  "success" in the summary and exit code of the backup script.
+
 Please note that neither `ssh_args_add`, `rsync_args_add`, `compress`, nor any
 "exclude" parameters are supported when using the "scp" backup type! And There
 "scp" backup type never _deletes_ files from the backup store; so if you reduce

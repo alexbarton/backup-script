@@ -23,6 +23,7 @@ declare -i count_all=0
 declare -i count_started=0
 declare -i count_ok=0
 declare -i count_ok_vanished=0
+declare -i count_enabled=0
 
 destinations=""
 
@@ -477,6 +478,14 @@ for f in "${sys[@]}"; do
 
 	count_all=$count_all+1
 
+	# Check if job is disabled
+	if [ "$backup_type" = "disabled" ]; then
+		echo "Job is DISABLED and will be skipped."
+		echo; continue
+	fi
+
+	count_enabled=$count_enabled+1
+
 	# Check target directory
 	if [ -z "$target" ]; then
 		echo "No target directory specified for \"$system\"!? Skipped!"
@@ -738,7 +747,9 @@ CleanUp
 echo -n "Done: "; date
 echo
 [ $count_all -eq 1 ] && s="" || s="s"
-echo " - $count_all job$s defined,"
+[ $count_enabled -eq $count_all ] \
+	&& echo " - $count_all job$s defined (all enabled)," \
+	|| echo " - $count_all job$s defined ($count_enabled enabled),"
 [ $count_started -eq 1 ] && s="" || s="s"
 echo " - $count_started job$s started,"
 echo " - $count_ok done without errors."
@@ -748,7 +759,7 @@ if [ $count_started -ne $count_ok ]; then
 	echo "----->  THERE HAVE BEEN ERRORS!  <-----"
 	echo
 	exit 6
-elif [ $count_all -ne $count_started ]; then
+elif [ $count_enabled -ne $count_started ]; then
 	exit 7
 fi
 
