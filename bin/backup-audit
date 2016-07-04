@@ -1,0 +1,278 @@
+#!/bin/bash
+#
+# backup-script system for cloning systems using rsync
+# Copyright (c)2008-2016 Alexander Barton, alex@barton.de
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Please read the file COPYING, README and AUTHORS for more information.
+#
+
+NAME=`basename $0`
+
+VERBOSE=0
+QUIET=0
+
+export LC_ALL=C
+
+# Default settings, can be overwritten in backup-script.conf:
+[ -d "/usr/local/etc/backup-script.d" ] \
+	&& conf_d="/usr/local/etc/backup-script.d" \
+	|| conf_d="/etc/backup-script.d"
+
+default_backup_type="rsync"
+default_files="running-config"
+default_generations=0
+default_target="/var/backups"
+
+# Search configuration file (last one is used as default!)
+for conf in \
+	"/usr/local/etc/backup-script.conf" \
+	"/etc/backup-script.conf" \
+	"${conf_d}/backup-script.conf" \
+	"/usr/local/etc/backup-script.conf" \
+; do
+	if [ -r "$conf" ]; then
+		# shellcheck source=/dev/null
+		source "$conf"
+		break
+	fi
+done
+
+Usage() {
+	echo "Usage: $NAME [-q|--quiet] [-v|--verbose] [<system> [<system> [...]]]"
+	echo "       $NAME <-d|--dirs> <dir1> <dir2>"
+	echo
+	exit 2
+}
+
+BeginDiff() {
+	echo "Differences in $*:"
+}
+
+PipeDiff() {
+	local line
+	IFS=
+	while read line; do
+		echo -e "     | $line"
+	done
+}
+
+EndDiff() {
+	:
+}
+
+HandleSystem() {
+	local fname="$1"
+
+	# Set global defaults
+	local backup_type="$default_backup_type"
+	local files="$default_files"
+	local generations="$default_generations"
+	local local=0
+	local system="$fname"
+	local target="$default_target"
+
+	# Read in system configuration file
+	# shellcheck source=/dev/null
+	source "$f"
+
+	target="$target/$(basename "$f")"
+
+	[[ -d "$target" ]] || return 0
+
+	# System name
+	[[ "$system" == "$fname" ]] \
+		&& systxt="\"$system\"" \
+		|| systxt="\"$fname\" [\"$system\"]"
+	[[ "$local" -eq 0 ]] \
+		&& echo "Checking $systxt ..." \
+		|| echo "Checking $systxt (local system) ..."
+
+	# Check if job is disabled
+	if [[ "$backup_type" == "disabled" ]]; then
+		echo "Job is DISABLED and will be skipped."
+		echo; return 0
+	fi
+
+	if [ $generations -lt 1 ]; then
+		echo "No generations configured, nothing to compare, skipping system!"
+		echo; return 1
+	fi
+
+	local latest_d="$target/latest"
+	if [[ ! -d "$latest_d" || ! -r "$latest_d/.stamp" ]]; then
+		echo "Failed to access latest backup generation in \"$latest_d\", skipping system!"
+		echo; return 1
+	fi
+	echo "Found latest generation in \"$latest_d\"."
+
+	declare -i code=-1
+	source "$latest_d/.stamp"
+
+	if [[ $code -ne 0 && $code -ne 24 ]]; then
+		echo "Last backup generation has errors, skipping system!"
+		echo; return 1
+	fi
+
+	# Search previous generation without errors
+	local previous_d=""
+	for d in $(ls -1dt $target/[0-9]*-[0-9]*); do
+		[[ -d "$d" && -r "$d/.stamp" ]] || return 0
+
+		declare -i code=-1
+		source "$d/.stamp"
+
+		if [[ $code -eq 0 || $code -eq 24 ]]; then
+			previous_d="$d"
+			break
+		fi
+	done
+	if [[ -z "$previous_d" || ! -d "$previous_d" || ! -r "$previous_d/.stamp" ]]; then
+		echo "Failed to find previous successfull backup generation, skipping system!"
+		echo; return 1
+	fi
+	echo "Comparing with generation in $previous_d ..."
+
+	DiffGenerations "$backup_type" "$previous_d" "$latest_d" "$files"
+	return_code=$?
+
+	echo
+	return $return_code
+}
+
+DiffGenerations() {
+	local backup_type="$1"
+	local gen1_d="$2"
+	local gen2_d="$3"
+	local files="$4"
+
+	local return_code=0
+
+	if [[ "$backup_type" == "rsync" ]]; then
+		# rsync Backup Type
+
+		for file in \
+			/etc/passwd \
+			/etc/shadow \
+			/etc/group \
+			/etc/gshadow \
+			\
+			/etc/fstab \
+			/etc/hostname \
+			/etc/hosts \
+			/etc/machine-id \
+			/etc/modules \
+			/etc/network/interfaces \
+			/etc/networks \
+		; do
+			[[ -r "${gen1_d}${file}" ]] || continue
+
+			[[ $VERBOSE -ne 0 ]] && echo "Checking \"$file\" ..."
+			diff -U 3 "${gen1_d}${file}" "${gen2_d}${file}" >"$tmp_diff"
+			if [[ $? -ne 0 ]]; then
+				BeginDiff "\"$file\""
+				tail -n +3 "$tmp_diff" | PipeDiff
+				EndDiff
+				return_code=1
+			fi
+		done
+
+		if [[ -d "${gen1_d}/var/lib/dpkg/info" && -d "${gen2_d}/var/lib/dpkg/info" ]]; then
+			[[ $VERBOSE -ne 0 ]] && echo "Checking list of installed packages ..."
+			chroot "${gen1_d}" dpkg --get-selections >"$tmp_1" || return 2
+			chroot "${gen2_d}" dpkg --get-selections >"$tmp_2" || return 2
+			diff -U 0 "$tmp_1" "$tmp_2" >"$tmp_diff"
+			if [[ $? -ne 0 ]]; then
+				BeginDiff "list of installed packages"
+				tail -n +3 "$tmp_diff" | grep -v '^@@ ' | PipeDiff
+				EndDiff
+				return_code=1
+			fi
+		fi
+	elif [[ "$backup_type" == "scp" ]]; then
+		# scp Backup type
+		file=$(basename "$files")
+		[[ $VERBOSE -ne 0 ]] && echo "Checking \"$file\" ..."
+		diff -U 3 "${gen1_d}/${file}" "${gen2_d}/${file}" >"$tmp_diff"
+		if [[ $? -ne 0 ]]; then
+			BeginDiff "\"$file\""
+			tail -n +3 "$tmp_diff" | PipeDiff
+			EndDiff
+			return_code=1
+		fi
+	else
+		echo "Backup type \"$backup_type\" undefined, \"$system\" skipped!"
+		echo; return 2
+	fi
+
+	return $return_code
+}
+
+MkTempFiles() {
+	tmp_1=$(mktemp /tmp/$NAME.XXXXXX) || exit 1
+	tmp_2=$(mktemp /tmp/$NAME.XXXXXX) || exit 1
+	tmp_diff=$(mktemp /tmp/$NAME.XXXXXX) || exit 1
+	tmp_out=$(mktemp /tmp/$NAME.XXXXXX) || exit 1
+}
+
+CleanUp() {
+	rm -f "$tmp_1" "$tmp_2" "$tmp_diff" "$tmp_out"
+}
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+	  "-d"|"--dirs")
+		shift
+		[[ $# -eq 2 ]] || Usage
+		MkTempFiles
+		DiffGenerations "$default_backup_type" "$1/" "$2/" "$default_files"
+		return_code=$?
+		CleanUp
+		exit $return_code
+		;;
+	  "-q"|"--quiet")
+		QUIET=1; shift
+		;;
+	  "-v"|"--verbose")
+		VERBOSE=1; shift
+		;;
+	  "-"*)
+		Usage
+		;;
+	  *)
+		break
+	esac
+done
+
+if [[ $# -ge 1 ]]; then
+	for s in "$@"; do
+		if [ ! -r "${conf_d}/$s" ]; then
+			echo "$NAME: Can' read \"${conf_d}/$s\"!"
+			exit 1
+		fi
+		sys+=("${conf_d}/$s")
+	done
+else
+	sys=("${conf_d}/"*)
+fi
+
+MkTempFiles
+for f in "${sys[@]}"; do
+	[[ -r "$f" && -f "$f" ]] || continue
+
+	fname=`basename $f`
+	case "$fname" in
+		"backup-script.conf"|*.sh)
+			continue
+			;;
+	esac
+
+	HandleSystem "$fname" >"$tmp_out" 2>&1
+	[[ $QUIET -eq 0 || $? -ne 0 ]] && cat "$tmp_out"
+done
+CleanUp
+
+# -eof-

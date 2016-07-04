@@ -36,6 +36,17 @@ Options:
 
 - `-q`: *quick mode*, don't calculate backup sizes.
 
+### backup-audit
+
+Show "relevant" differences in system configuration between backup generations.
+
+Usage: `backup-audit [-q] [-v] [<system> [<system> [...]]]`
+
+Options:
+
+- `-q`: *quiet mode*, don't show systems without "relevant" changes.
+- `-v`: *verbose mode*, show all checks that are run.
+
 
 ## Configuration
 
