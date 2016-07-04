@@ -16,5 +16,6 @@ install-local:
 	 $(DESTDIR)$(PREFIX)/sbin/backup-status
 
 check-local:
-	./backup-script --help | fgrep 'Usage' >/dev/null
-	./backup-script --help | fgrep 'Configuration file' >/dev/null
+	./backup-script --help | fgrep 'Usage: ' >/dev/null
+	./backup-script --help | fgrep 'Configuration file is "' >/dev/null
+	./backup-status --help | fgrep 'Usage: ' >/dev/null
