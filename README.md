@@ -24,7 +24,7 @@ When no *system* is given, all defined systems are backed up.
 
 Backup all systems and mail the report to "root".
 
-Usage: `backup-script-wrapper`
+Usage: `backup-script-wrapper [<backup-script-options-and-systems ...>]`
 
 ### backup-status
 
