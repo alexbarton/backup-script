@@ -25,22 +25,11 @@ NAME="backup-script"
 DELIMITER="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 HOST=`hostname -f`
 LOGFILE="/var/log/$NAME.log"
-PIDFILE="/var/run/$NAME.pid"
 SUBJECT="$NAME results"
 TMP=`mktemp /tmp/$NAME.XXXXXXXX` || exit 1
 
 PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 export PATH
-
-# check PID file ("lock file")
-if [ -e "$PIDFILE" ]; then
-	echo "Lockfile \"$PIDFILE\" already exists."
-	echo "Is an other instance still running?"
-	echo
-	echo -n "Aborted: "; date
-	echo
-	exit 4
-fi
 
 exec >"$TMP" 2>&1
 
