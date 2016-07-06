@@ -76,6 +76,19 @@ For example:
 - `/etc/backups-script.d/clientXY.example.com`: configuration for host 2
 
 
+### Global Settings
+
+The following global configuration options exist:
+
+- `setup_exec`: Script to run _before_ creating the lock file etc.
+- `pre_exec`: Pre-execution script, run before all jobs.
+- `post_exec`: Post-execution script, run after all jobs.
+
+In Addition, all job configuration options (see below) that have a "default_XXX"
+variant can be used and define default values for all jobs that don't overwrite
+them individually.
+
+
 ## Configuration Variables
 
 ### system
@@ -210,8 +223,9 @@ Optional script to execute after `rsync` exited. Default: none.
 
 ### Compatibility Variables
 
-The following configurations variables used by the backup-pull(1) script in job
-definition files are automatically mapped to the new backup-script variables:
+The following job configurations variables used by the outdated backup-pull(1)
+script in job definition files are automatically mapped to the new backup-script
+variables:
 
 * host -> system
 * source -> source_root

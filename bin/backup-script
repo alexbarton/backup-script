@@ -31,6 +31,7 @@ destinations=""
 [ -d "/usr/local/etc/backup-script.d" ] \
 	&& conf_d="/usr/local/etc/backup-script.d" \
 	|| conf_d="/etc/backup-script.d"
+setup_exec=""
 pre_exec=""
 post_exec=""
 default_backup_type="rsync"
@@ -341,6 +342,19 @@ if [ $# -ge 1 ]; then
 	done
 else
 	sys=("${conf_d}/"*)
+fi
+
+if [ -n "$setup_exec" ]; then
+	echo "Executing \"$setup_exec\" ..."
+	sh -c $setup_exec
+	if [ $? -ne 0 ]; then
+		echo "Error: setup command failed!"; echo
+		CleanUp
+		echo "Aborting backup."; echo
+		exit 5
+	fi
+	sleep 2
+	echo
 fi
 
 # check and create PID file
