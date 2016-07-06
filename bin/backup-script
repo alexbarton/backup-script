@@ -330,8 +330,6 @@ echo "Rsync command is $rsync, protocol version $rsync_proto."
 [[ -n "$TAG" ]] && echo "Running jobs tagged with \"$TAG\"."
 echo
 
-trap GotSignal SIGINT
-
 if [ $# -ge 1 ]; then
 	for s in "$@"; do
 		if [ ! -r "${conf_d}/$s" ]; then
@@ -349,13 +347,14 @@ if [ -n "$setup_exec" ]; then
 	sh -c $setup_exec
 	if [ $? -ne 0 ]; then
 		echo "Error: setup command failed!"; echo
-		CleanUp
 		echo "Aborting backup."; echo
 		exit 5
 	fi
 	sleep 2
 	echo
 fi
+
+trap GotSignal SIGINT
 
 # check and create PID file
 if [ -e "$PIDFILE" ]; then
