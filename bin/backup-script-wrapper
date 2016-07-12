@@ -23,10 +23,10 @@ fi
 NAME="backup-script"
 
 DELIMITER="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-HOST=`hostname -f`
+HOST=$(hostname -f)
 LOGFILE="/var/log/$NAME.log"
 SUBJECT="$NAME results"
-TMP=`mktemp /tmp/$NAME.XXXXXXXX` || exit 1
+TMP=$(mktemp /tmp/$NAME.XXXXXXXX) || exit 1
 
 PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 export PATH
@@ -35,8 +35,8 @@ exec >"$TMP" 2>&1
 
 echo "$NAME Report"
 echo
-echo " - Host: `hostname -f`"
-echo " - User: `id -un`"
+echo " - Host: $(hostname -f)"
+echo " - User: $(id -un)"
 echo
 echo "Command:"
 echo "$0" "$@"
@@ -59,7 +59,7 @@ case "$r" in
 		SUBJECT="$SUBJECT - with ERRORS!"
 esac
 
-cat "$TMP" | mail -s "$HOST: $SUBJECT" "$MAILTO"
+mail -s "$HOST: $SUBJECT" "$MAILTO" <"$TMP"
 
 rm -f "$TMP"
 exit $r

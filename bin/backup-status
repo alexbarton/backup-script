@@ -10,7 +10,7 @@
 # Please read the file COPYING, README and AUTHORS for more information.
 #
 
-NAME=`basename $0`
+NAME=$(basename "$0")
 PIDFILE="/var/run/backup-script.pid"
 QUICK=0
 ONLY_ERRORS=0
@@ -59,7 +59,8 @@ Check_Size() {
 	# $2: padding
 
 	if [ "$QUICK" = "0" ]; then
-		size=`du -Hhs "$1" | cut -f1`
+		size=$(du -Hhs "$1" | cut -f1)
+		# shellcheck disable=SC2086
 		echo "$2  - Size:" $size
 	fi
 }
@@ -91,25 +92,27 @@ Check_Stamp() {
 			duration_t=$end_t-$start_t
 		else
 			if [ "$(uname)" = "Linux" ]; then
-				end=`LC_ALL=C stat "$1" | grep "^Modify: " \
-				 | cut -d':' -f2- | cut -d. -f1`
+				end=$(LC_ALL=C stat "$1" | grep "^Modify: " \
+				 | cut -d':' -f2- | cut -d. -f1)
 			else
-				end=`LC_ALL=C stat -f "%Sc" "$1"`
+				end=$(LC_ALL=C stat -f "%Sc" "$1")
 			fi
 		fi
+		# shellcheck disable=SC2086
 		[ -n "$start" ] && echo "$2  - Start date:" $start
+		# shellcheck disable=SC2086
 		[ -n "$end" ] && echo "$2  - End date:" $end
 		if [ $duration_t -gt -1 ]; then
 			declare -i s=$duration_t
 			if [ $s -ge 60 ]; then
-				declare -i m=$(($s/60))
-				declare -i s=$(($s%60))
+				declare -i m=$((s / 60))
+				declare -i s=$((s % 60))
 				if [ $m -ge 60 ]; then
-					declare -i h=$(($m/60))
-					declare -i m=$(($m%60))
+					declare -i h=$((m / 60))
+					declare -i m=$((m % 60))
 					if [ $h -ge 24 ]; then
-						declare -i d=$(($h/24))
-						declare -i h=$(($h%24))
+						declare -i d=$((h / 24))
+						declare -i h=$((h % 24))
 						duration="${d}d${h}h${m}m${s}s"
 					else
 						duration="${h}h${m}m${s}s"
@@ -201,7 +204,7 @@ fi
 for f in "${sys[@]}"; do
 	[[ -r "$f" && -f "$f" ]] || continue
 
-	fname=`basename $f`
+	fname=$(basename "$f")
 	case "$fname" in
 		"backup-script.conf"|*.sh)
 			continue

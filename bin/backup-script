@@ -61,6 +61,7 @@ Usage() {
 	echo
 	echo "When no <system> is given, all defined systems are used."
 	echo
+	# shellcheck disable=SC2086
 	echo -e $config_info
 	echo
 	exit 2
@@ -234,6 +235,7 @@ Initialize_Last_SysTarget_Snapshot() {
 	case "$fs" in
 	  "btrfs")
 		# Search directory of last generation, if any
+		# shellcheck disable=SC2012
 		last=$(ls -1d "$sys_target"/[0-9]* 2>/dev/null | sort -r | head -n1)
 		if [ -n "$last" ]; then
 			if [ ! -d "$last" ]; then
@@ -658,12 +660,14 @@ for f in "${sys[@]}"; do
 		$SHELL -c "$cmd"; ret=$?
 		end_t=$(date "+%s")
 
-		echo "code=$ret" >"$stamp_file"
-		echo "start_t=$start_t" >>"$stamp_file"
-		echo "end_t=$end_t" >>"$stamp_file"
-		echo "cmd='$cmd'" >>"$stamp_file"
-		echo "backup_host='`hostname -f`'" >>"$stamp_file"
-		echo "backup_user='`id -un`'" >>"$stamp_file"
+		{
+			echo "code=$ret"
+			echo "start_t=$start_t"
+			echo "end_t=$end_t"
+			echo "cmd='$cmd'"
+			echo "backup_host='$(hostname -f)'"
+			echo "backup_user='$(id -un)'"
+		} >"$stamp_file"
 	else
 		echo " *** Trial run, not executing save command!"
 		ret=0
@@ -698,6 +702,7 @@ for f in "${sys[@]}"; do
 		fi
 		# Clean up old generations
 		declare -i gen_count=$generations+2
+		# shellcheck disable=SC2012
 		to_delete=$(ls -1t "$sys_root" 2>/dev/null | tail -n+$gen_count | sort)
 		if [[ -n "$to_delete" && $ok -eq 1 ]]; then
 			[ "$DRYRUN" -eq 0 ] \
@@ -711,6 +716,7 @@ for f in "${sys[@]}"; do
 				fi
 				last=$(stat "$dir/.stamp" 2>/dev/null | grep "^Modify: " \
 				 | cut -d':' -f2- | cut -d. -f1)
+				# shellcheck disable=SC2086
 				echo "Removing backup from" $last "..."
 				if [ "$DRYRUN" -eq 0 ]; then
 					DeleteSubvolume "$dir"
@@ -735,6 +741,7 @@ sync
 if [ "$DRYRUN" -eq 0 ]; then
 	paths=""
 	paths_zfs=""
+	# shellcheck disable=SC2086
 	for dest in $(echo $destinations | sed -e 's/ /\n/g' | sort | uniq); do
 		fs=$(GetFS "$dest")
 		case $fs in
@@ -746,10 +753,12 @@ if [ "$DRYRUN" -eq 0 ]; then
 		esac
 	done
 	if [ -n "$paths" ]; then
+		# shellcheck disable=SC2086
 		df -h $paths
 		echo
 	fi
 	if [ -n "$paths_zfs" ]; then
+		# shellcheck disable=SC2086
 		zfs list $paths_zfs
 		echo
 	fi
