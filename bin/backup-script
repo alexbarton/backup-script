@@ -81,7 +81,7 @@ CleanUp() {
 
 GotSignal() {
 	echo
-	echo "--> Got break signal, cleaning up & aborting ..."
+	echo "--> Got signal, cleaning up & aborting ..."
 	echo
 	CleanUp
 	echo -n "Aborted: "; date
@@ -356,7 +356,7 @@ if [ -n "$setup_exec" ]; then
 	echo
 fi
 
-trap GotSignal SIGINT
+trap GotSignal SIGINT SIGTERM
 
 # check and create PID file
 if [ -e "$PIDFILE" ]; then
