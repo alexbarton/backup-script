@@ -163,6 +163,8 @@ DiffGenerations() {
 			/etc/group \
 			/etc/gshadow \
 			\
+			/boot/grub/grub.cfg \
+			/etc/bash.bashrc \
 			/etc/fstab \
 			/etc/hostname \
 			/etc/hosts \
@@ -170,6 +172,13 @@ DiffGenerations() {
 			/etc/modules \
 			/etc/network/interfaces \
 			/etc/networks \
+			/etc/nsswitch.conf \
+			/etc/profile \
+			/etc/rc.local \
+			/etc/resolv.conf \
+			/etc/services \
+			/etc/sudoers \
+			/etc/sysctl.conf \
 		; do
 			[[ -r "${gen1_d}${file}" ]] || continue
 
