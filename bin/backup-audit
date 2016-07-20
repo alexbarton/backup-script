@@ -164,10 +164,18 @@ DiffGenerations() {
 			/etc/gshadow \
 			\
 			/boot/grub/grub.cfg \
+			/etc/aliases \
 			/etc/bash.bashrc \
+			/etc/crontab \
+			/etc/environment \
 			/etc/fstab \
 			/etc/hostname \
 			/etc/hosts \
+			/etc/hosts.allow \
+			/etc/hosts.deny \
+			/etc/inittab \
+			/etc/ld.so.conf \
+			/etc/login.defs \
 			/etc/machine-id \
 			/etc/modules \
 			/etc/network/interfaces \
@@ -177,6 +185,9 @@ DiffGenerations() {
 			/etc/rc.local \
 			/etc/resolv.conf \
 			/etc/services \
+			/etc/shells \
+			/etc/ssh/sshd_config \
+			/etc/sshd_config \
 			/etc/sudoers \
 			/etc/sysctl.conf \
 		; do
