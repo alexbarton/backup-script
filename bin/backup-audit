@@ -240,7 +240,7 @@ while [[ $# -gt 0 ]]; do
 		shift
 		[[ $# -eq 2 ]] || Usage
 		MkTempFiles
-		DiffGenerations "$default_backup_type" "$1/" "$2/" "$default_files"
+		DiffGenerations "$default_backup_type" "$1" "$2" "$default_files"
 		return_code=$?
 		CleanUp
 		exit $return_code
