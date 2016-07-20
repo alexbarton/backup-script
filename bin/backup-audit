@@ -64,6 +64,24 @@ EndDiff() {
 	:
 }
 
+ListDirectory() {
+	local base_dir="$1"
+	local dir_name="$2"
+
+	local exclude
+
+	exclude='total | .$| ..$'
+	if [[ "$dir_name" == "/" ]]; then
+		exclude="$exclude"'| \.stamp$| dev$| etc$| root$| run$| tmp$'
+		exclude="$exclude"'| data$| srv$'
+		exclude="$exclude"'| [[:alnum:]_-]+\.log(\.[[:alnum:]]+|)$'
+	fi
+
+	# shellcheck disable=SC2012
+	ls -al "$base_dir$dir_name" 2>/dev/null \
+		| egrep -v "($exclude)"
+}
+
 HandleSystem() {
 	local fname="$1"
 
@@ -198,6 +216,35 @@ DiffGenerations() {
 			if [[ $? -ne 0 ]]; then
 				BeginDiff "\"$file\""
 				tail -n +3 "$tmp_diff" | PipeDiff
+				EndDiff
+				return_code=1
+			fi
+		done
+
+		for dir in \
+			/ \
+			/etc/cron.d/ \
+			/etc/cron.daily/ \
+			/etc/cron.hourly/ \
+			/etc/cron.monthly/ \
+			/etc/cron.weekly/ \
+			/etc/sudoers.d/ \
+			/var/log/dumps/ \
+		; do
+			[[ ! -d "${gen1_d}${dir}" ]] && continue
+			[[ ! -d "${gen2_d}${dir}" ]] && continue
+
+			# Make sure that this is a system root; comparing other
+			# root folders results in misleading output ...
+			[[ "$dir" == "/" && ! -d "${gen1_d}${dir}/etc" ]] && continue
+
+			[[ $VERBOSE -ne 0 ]] && echo "Checking \"$dir\" ..."
+			ListDirectory "${gen1_d}" "${dir}" >"$tmp_1"
+			ListDirectory "${gen2_d}" "${dir}" >"$tmp_2"
+			diff -U 0 "$tmp_1" "$tmp_2" >"$tmp_diff"
+			if [[ $? -ne 0 ]]; then
+				BeginDiff "\"$dir\" directory"
+				tail -n +3 "$tmp_diff" | egrep -v '^@@ ' | PipeDiff
 				EndDiff
 				return_code=1
 			fi
