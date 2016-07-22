@@ -72,8 +72,8 @@ ListDirectory() {
 
 	exclude='total | .$| ..$'
 	if [[ "$dir_name" == "/" ]]; then
-		exclude="$exclude"'| \.stamp$| dev$| etc$| root$| run$| tmp$'
-		exclude="$exclude"'| data$| srv$'
+		exclude="$exclude"'| \.stamp$| dev$| etc$| proc$| root$| run$| sys$| tmp$'
+		exclude="$exclude"'| data$| net$| srv$'
 		exclude="$exclude"'| [[:alnum:]_-]+\.log(\.[[:alnum:]]+|)$'
 	fi
 
