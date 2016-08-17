@@ -70,7 +70,7 @@ ListDirectory() {
 
 	local exclude
 
-	exclude='total | .$| ..$'
+	exclude='total '
 	if [[ "$dir_name" == "/" ]]; then
 		exclude="$exclude"'| \.stamp$| dev$| etc$| proc$| root$| run$| sys$| tmp$'
 		exclude="$exclude"'| data$| net$| srv$'
@@ -78,8 +78,8 @@ ListDirectory() {
 	fi
 
 	# shellcheck disable=SC2012
-	ls -al "$base_dir$dir_name" 2>/dev/null \
-		| egrep -v "($exclude)"
+	ls -Al "$base_dir$dir_name" 2>/dev/null \
+		| egrep -v "($exclude)" | awk '!($2="")' | column -t
 }
 
 HandleSystem() {
