@@ -54,6 +54,7 @@ fi
 
 case "$r" in
 	0)
+		SUBJECT="$SUBJECT - success"
 		;;
 	*)
 		SUBJECT="$SUBJECT - with ERRORS!"
