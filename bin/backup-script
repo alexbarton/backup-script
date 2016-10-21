@@ -16,6 +16,7 @@ PIDFILE="/var/run/$NAME.pid"
 DRYRUN=0
 VERBOSE=0
 TAG=""
+PREPOSTEXEC=1
 
 export LC_ALL=C
 
@@ -58,6 +59,7 @@ Usage() {
 	echo "  -n, --dry-run       Test run only, don't copy any data."
 	echo "  -p, --progress      Show progress, see rsync(1)."
 	echo "  -t TAG, --tag TAG   Only run jobs with tag TAG."
+	echo "  -x, --no-exec       Don't run global pre-/post-exec commands."
 	echo
 	echo "When no <system> is given, all defined systems are used."
 	echo
@@ -68,7 +70,7 @@ Usage() {
 }
 
 CleanUp() {
-	if [ -n "$post_exec" ]; then
+	if [[ -n "$pre_exec" && $PREPOSTEXEC -ne 0 ]]; then
 		echo "Executing \"$post_exec\" ..."
 		sh -c $post_exec
 		if [ $? -ne 0 ]; then
@@ -305,6 +307,9 @@ while [ $# -gt 0 ]; do
 		shift; TAG="$1"; shift
 		[ -n "$TAG" ] || Usage
 		;;
+	  "-x"|"--no-exec")
+		PREPOSTEXEC=0; shift
+		;;
 	  "-"*)
 		Usage
 		;;
@@ -344,7 +349,7 @@ else
 	sys=("${conf_d}/"*)
 fi
 
-if [ -n "$setup_exec" ]; then
+if [[ -n "$setup_exec" && $PREPOSTEXEC -ne 0 ]]; then
 	echo "Executing \"$setup_exec\" ..."
 	sh -c $setup_exec
 	if [ $? -ne 0 ]; then
@@ -375,7 +380,7 @@ else
 	echo "$$" >>"$PIDFILE"
 fi
 
-if [ -n "$pre_exec" ]; then
+if [[ -n "$pre_exec" && $PREPOSTEXEC -ne 0 ]]; then
 	echo "Executing \"$pre_exec\" ..."
 	sh -c $pre_exec
 	if [ $? -ne 0 ]; then

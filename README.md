@@ -17,6 +17,7 @@ Options:
 - `-n`, `--dry-run`: Test run only, don't copy any data.
 - `-p`, `--progress`: Show progress, see rsync(1).
 - `-t TAG`, `--tag TAG`: Only run jobs with tag TAG (see "tags" variable below).
+- `x`, `--no-exec`: Don't run global setup-, pre-, and post-exec commands.
 
 When no *system* is given, all defined systems are backed up.
 
