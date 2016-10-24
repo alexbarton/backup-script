@@ -1,15 +1,25 @@
 # Backup Script
 
-A script for cloning systems using rsync.  
+A script for backing up data using `ssh`(1), `rsync`(1), and `scp`(1).
+Can handle backup generations on *btrfs* and *ZFS*.
+
 Copyright (c)2008-2016 Alexander Barton (<alex@barton.de>)  
 Homepage: https://github.com/alexbarton/backup-script
 
+
+## Installation
+
+Call the scripts located in `./bin` directly from the source folder, or run
+`make install` to install them to `/usr/local/sbin`.
+
+You can set `PREFIX` to use an other path prefix than `/usr/local` like this:
+`make PREFIX=/opt/backup-script install`.
 
 ## Usage
 
 ### backup-script
 
-Backup all or individual systems.
+Run all or individual backup jobs.
 
 Usage: `backup-script [<options>] [<job> [<job> [...]]]`
 
@@ -240,14 +250,15 @@ The following job configurations variables used by the outdated backup-pull(1)
 script in job definition files are automatically mapped to the new backup-script
 variables:
 
-* host -> system
-* source -> source_root
-* pre_exec -> job_pre_exec
-* post_exec -> job_post_exec
+* `host` -> `system`
+* `source` -> `source_root`
+* `pre_exec` -> `job_pre_exec`
+* `post_exec` -> `job_post_exec`
 
 
 ## Exit codes
 
+- 0: No error, success.
 - 1: Unspecific Error!
 - 2: Usage information has been shown.
 - 3: Can't read job definition
