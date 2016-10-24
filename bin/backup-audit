@@ -212,8 +212,7 @@ DiffGenerations() {
 			[[ -r "${gen1_d}${file}" ]] || continue
 
 			[[ $VERBOSE -ne 0 ]] && echo "Checking \"$file\" ..."
-			diff -U 3 "${gen1_d}${file}" "${gen2_d}${file}" >"$tmp_diff"
-			if [[ $? -ne 0 ]]; then
+			if ! diff -U 3 "${gen1_d}${file}" "${gen2_d}${file}" >"$tmp_diff"; then
 				BeginDiff "\"$file\""
 				tail -n +3 "$tmp_diff" | PipeDiff
 				EndDiff
@@ -241,8 +240,7 @@ DiffGenerations() {
 			[[ $VERBOSE -ne 0 ]] && echo "Checking \"$dir\" ..."
 			ListDirectory "${gen1_d}" "${dir}" >"$tmp_1"
 			ListDirectory "${gen2_d}" "${dir}" >"$tmp_2"
-			diff -U 0 "$tmp_1" "$tmp_2" >"$tmp_diff"
-			if [[ $? -ne 0 ]]; then
+			if ! diff -U 0 "$tmp_1" "$tmp_2" >"$tmp_diff"; then
 				BeginDiff "\"$dir\" directory"
 				tail -n +3 "$tmp_diff" | egrep -v '^@@ ' | PipeDiff
 				EndDiff
@@ -254,8 +252,7 @@ DiffGenerations() {
 			[[ $VERBOSE -ne 0 ]] && echo "Checking list of installed packages ..."
 			chroot "${gen1_d}" dpkg --get-selections >"$tmp_1" || return 2
 			chroot "${gen2_d}" dpkg --get-selections >"$tmp_2" || return 2
-			diff -U 0 "$tmp_1" "$tmp_2" >"$tmp_diff"
-			if [[ $? -ne 0 ]]; then
+			if ! diff -U 0 "$tmp_1" "$tmp_2" >"$tmp_diff"; then
 				BeginDiff "list of installed packages"
 				tail -n +3 "$tmp_diff" | grep -v '^@@ ' | PipeDiff
 				EndDiff
@@ -266,8 +263,7 @@ DiffGenerations() {
 		# scp Backup type
 		file=$(basename "$files")
 		[[ $VERBOSE -ne 0 ]] && echo "Checking \"$file\" ..."
-		diff -U 3 "${gen1_d}/${file}" "${gen2_d}/${file}" >"$tmp_diff"
-		if [[ $? -ne 0 ]]; then
+		if ! diff -U 3 "${gen1_d}/${file}" "${gen2_d}/${file}" >"$tmp_diff"; then
 			BeginDiff "\"$file\""
 			tail -n +3 "$tmp_diff" | PipeDiff
 			EndDiff
@@ -340,8 +336,8 @@ for f in "${sys[@]}"; do
 			;;
 	esac
 
-	HandleSystem "$fname" >"$tmp_out" 2>&1
-	[[ $QUIET -eq 0 || $? -ne 0 ]] && cat "$tmp_out"
+	HandleSystem "$fname" >"$tmp_out" 2>&1; result=$?
+	[[ $QUIET -eq 0 || $result -ne 0 ]] && cat "$tmp_out"
 done
 CleanUp
 
