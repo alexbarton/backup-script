@@ -32,11 +32,19 @@ Usage: `backup-script-wrapper [<backup-script-options-and-job-names ...>]`
 
 Show information about backups.
 
-Usage: `backup-status [-q] [<job> [<job> [...]]]`
+Usage:
+
+- `backup-status [--errors|--latest] [--quick] [<job> [<job> [...]]]`
+- `backup-status --running`
 
 Options:
 
-- `-q`: *quick mode*, don't calculate backup sizes.
+- `-e`, `--errors`: only show current backups with errors (implies `--latest`).
+- `-l`, `--latest`: only show latest backup generations.
+- `-q`, `--quick`: *quick mode*, don't calculate backup sizes.
+- `-r`, `--running`: check if an `backup-script` task is currently running.
+
+When no *job* is given, all defined jobs are listed.
 
 ### backup-audit
 
@@ -46,8 +54,11 @@ Usage: `backup-audit [-q] [-v] [<job> [<job> [...]]]`
 
 Options:
 
-- `-q`: *quiet mode*, don't show jobs without "relevant" changes.
-- `-v`: *verbose mode*, show all checks that are run.
+- `-d`, `--dirs`: compare two backup directories (not jobs).
+- `-q`, `--quiet`: *quite mode*, only list jobs with changes or errors.
+- `-v`, `--verbose`: *verbose mode*, show all checks that are run.
+
+When no *job* is given, all defined jobs are checked.
 
 
 ## Configuration

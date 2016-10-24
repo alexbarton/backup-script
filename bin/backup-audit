@@ -42,8 +42,14 @@ for conf in \
 done
 
 Usage() {
-	echo "Usage: $NAME [-q|--quiet] [-v|--verbose] [<system> [<system> [...]]]"
+	echo "Usage: $NAME [-q|--quiet] [-v|--verbose] [<job> [<job> [...]]]"
 	echo "       $NAME <-d|--dirs> <dir1> <dir2>"
+	echo
+	echo "  -d, --dirs      Compare two backup directories (not jobs)."
+	echo "  -q, --quiet     Quite mode, only list jobs with changes or errors."
+	echo "  -v, --verbose   Verbose mode, show all checks that are run."
+	echo
+	echo "When no <job> is given, all defined jobs are checked."
 	echo
 	exit 2
 }

@@ -43,13 +43,15 @@ for conf in \
 done
 
 Usage() {
-	echo "Usage: $NAME [--errors|--latest] [--quick] [<system> [<system> [...]]]"
+	echo "Usage: $NAME [--errors|--latest] [--quick] [<job> [<job> [...]]]"
 	echo "       $NAME --running"
 	echo
-	echo "  --errors, -e    Only show current backups with errors (implies \"--latest\")."
-	echo "  --latest, -l    Only show latest backup generations."
-	echo "  --quick, -q     Don't calculate backup sizes."
-	echo "  --running, -r   Check if an \"backup-script\" task is currently running."
+	echo "  -e, --errors    Only show current backups with errors (implies \"--latest\")."
+	echo "  -l, --latest    Only show latest backup generations."
+	echo "  -q, --quick     Don't calculate backup sizes."
+	echo "  -r, --running   Check if an \"backup-script\" task is currently running."
+	echo
+	echo "When no <job> is given, all defined jobs are listed."
 	echo
 	exit 2
 }

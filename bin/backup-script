@@ -54,14 +54,14 @@ default_job_post_exec=""
 default_tags=""
 
 Usage() {
-	echo "Usage: $NAME [<options>] [<system> [<system> [...]]]"
+	echo "Usage: $NAME [<options>] [<job> [<job> [...]]]"
 	echo
 	echo "  -n, --dry-run       Test run only, don't copy any data."
 	echo "  -p, --progress      Show progress, see rsync(1)."
 	echo "  -t TAG, --tag TAG   Only run jobs with tag TAG."
 	echo "  -x, --no-exec       Don't run global pre-/post-exec commands."
 	echo
-	echo "When no <system> is given, all defined systems are used."
+	echo "When no <job> is given, all defined systems are used."
 	echo
 	# shellcheck disable=SC2086
 	echo -e $config_info
