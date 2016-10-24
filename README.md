@@ -11,7 +11,7 @@ Homepage: https://github.com/alexbarton/backup-script
 
 Backup all or individual systems.
 
-Usage: `backup-script [<options>] [<system> [<system> [...]]]`
+Usage: `backup-script [<options>] [<job> [<job> [...]]]`
 
 Options:
 
@@ -20,19 +20,19 @@ Options:
 - `-t TAG`, `--tag TAG`: Only run jobs with tag TAG (see "tags" variable below).
 - `-x`, `--no-exec`: Don't run global setup-, pre-, and post-exec commands.
 
-When no *system* is given, all defined systems are backed up.
+When no *job* is given, all defined jobs are run.
 
 ### backup-script-wrapper
 
-Backup all systems and mail the report to "root".
+Backup all systems ("run all jobs") and mail the report to "root".
 
-Usage: `backup-script-wrapper [<backup-script-options-and-systems ...>]`
+Usage: `backup-script-wrapper [<backup-script-options-and-job-names ...>]`
 
 ### backup-status
 
 Show information about backups.
 
-Usage: `backup-status [-q] [<system> [<system> [...]]]`
+Usage: `backup-status [-q] [<job> [<job> [...]]]`
 
 Options:
 
@@ -42,11 +42,11 @@ Options:
 
 Show "relevant" differences in system configuration between backup generations.
 
-Usage: `backup-audit [-q] [-v] [<system> [<system> [...]]]`
+Usage: `backup-audit [-q] [-v] [<job> [<job> [...]]]`
 
 Options:
 
-- `-q`: *quiet mode*, don't show systems without "relevant" changes.
+- `-q`: *quiet mode*, don't show jobs without "relevant" changes.
 - `-v`: *verbose mode*, show all checks that are run.
 
 
@@ -56,20 +56,20 @@ All default configuration variables are read from the first file found of this
 list: `/usr/local/etc/backup-scrupt.conf`, `/etc/backup-script.conf` or
 from `/etc/backup-script.d/backup-script.conf` (deprecated).
 
-All systems which should be backed-up are configured using  individual files
+All jobs that should be backed-up are configured using individual files
 in the configuration directory, which is `/usr/local/etc/backup-script.d/` or
 `/etc/backup-script.d/` by default (whichever is found first), and can be
 specified using the `conf_d` variable in the main configuration file.
 
-The must be one file for each system to backup (files ending in `*.sh` are
+The must be one job file for each system to backup (files ending in `*.sh` are
 skipped, as well as files named `backup-script.conf`). Please avoid spaces and
 other "special" characters! The filename is used as hostname for the system by
 default, but this can be overwritten using the `system` configuration variable.
 
 Variables in `backup-script.conf` must be prefixed with `default_` to define
-default values for all systems.
+default values for all jobs.
 
-All defaults can be overwritten in the individual system configuration files.
+All defaults can be overwritten in the individual job configuration files.
 
 For example:
 
@@ -136,8 +136,8 @@ Default: "running-config".
 
 ### [default_]target
 
-Local backup directory. The backup of each system is stored in a folder named
-like the system (see `system` variable) inside of this target directory.
+Local backup directory. The backup data of each job is stored in a folder named
+like the job (see `system` variable) inside of this target directory.
 
 *Note:* There is *no* default, you have to specify this variable, for example as
 `default_target` in the `backups-script.conf` file!
@@ -239,9 +239,9 @@ variables:
 
 - 1: Unspecific Error!
 - 2: Usage information has been shown.
-- 3: Can't read system definition
+- 3: Can't read job definition
 - 4: PID-file exists!
 - 5: Pre-exec command failed!
-- 6: There have been systems with errors!
+- 6: There have been jobs with errors!
 - 7: Not all jobs were run!
 - 9: Aborted (CTRL-C)!
