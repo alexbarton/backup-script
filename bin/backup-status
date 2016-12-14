@@ -25,8 +25,9 @@ declare -i snapshots=0
 [ -d "/usr/local/etc/backup-script.d" ] \
 	&& conf_d="/usr/local/etc/backup-script.d" \
 	|| conf_d="/etc/backup-script.d"
-default_target="/var/backups"
+default_backup_type="rsync"
 default_generations=0
+default_target="/var/backups"
 
 # Search configuration file (last one is used as default!)
 for conf in \
@@ -217,6 +218,7 @@ for f in "${sys[@]}"; do
 	system="$fname"
 	target="$default_target"
 	generations="$default_generations"
+	backup_type="$default_backup_type"
 
 	# Read in system configuration file
 	# shellcheck source=/dev/null
@@ -227,6 +229,7 @@ for f in "${sys[@]}"; do
 	[ -d "$target" ] || continue
 
 	if [ "$ONLY_ERRORS" != "0" ]; then
+		[[ "$backup_type" = "disabled" ]] && continue
 		[ $generations -gt 0 ] \
 			&& result=$(Get_Result_Code "$target/latest/.stamp") \
 			|| result=$(Get_Result_Code "$target/.stamp")
