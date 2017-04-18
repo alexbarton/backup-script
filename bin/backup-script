@@ -546,9 +546,13 @@ for f in "${sys[@]}"; do
 		if [[ -n "$last" && ! -e "$last/.stamp" ]]; then
 			# Old backup directory without "stamp file", continue
 			echo "Found incomplete snapshot in \"$last\", reusing and renaming it ..."
-			if ! RenameSubvolume "$last" "$sys_target"; then
-				echo "Failed to rename last snapshot \"$last\" to \"$sys_target\"!? \"$system\" skipped!"
-				echo; continue
+			if [ "$DRYRUN" -eq 0 ]; then
+				if ! RenameSubvolume "$last" "$sys_target"; then
+					echo "Failed to rename last snapshot \"$last\" to \"$sys_target\"!? \"$system\" skipped!"
+					echo; continue
+				fi
+			else
+				echo " *** Trial run, not renaming snapshot \"$last\" to \"$sys_target\"!"
 			fi
 		elif [ -n "$last" ]; then
 			# Old backup directory found, create new snapshot
