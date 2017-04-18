@@ -72,8 +72,7 @@ Usage() {
 CleanUp() {
 	if [[ -n "$pre_exec" && $PREPOSTEXEC -ne 0 ]]; then
 		echo "Executing \"$post_exec\" ..."
-		sh -c $post_exec
-		if [ $? -ne 0 ]; then
+		if ! sh -c $post_exec; then
 			echo "Warning: post-exec command failed!"
 		fi
 		echo
@@ -322,13 +321,11 @@ echo -n "Started: "; date
 echo -e "$config_info"
 
 # Check rsync and its protocol version
-rsync=$(which "rsync" 2>/dev/null)
-if [ $? -ne 0 ]; then
+if ! rsync=$(which "rsync" 2>/dev/null); then
 	echo "Failed to detect rsync(1)! Is it installed in your \$PATH?"
 	exit 1
 fi
-rsync_proto=$($rsync --version 2>/dev/null | head -n 1 | sed 's/.*  protocol version \([0-9]*\)$/\1/')
-if [ $? -ne 0 ]; then
+if ! rsync_proto=$($rsync --version 2>/dev/null | head -n 1 | sed 's/.*  protocol version \([0-9]*\)$/\1/'); then
 	echo "Failed to detect protocol version of $rsync!"
 	exit 1
 fi
@@ -351,8 +348,7 @@ fi
 
 if [[ -n "$setup_exec" && $PREPOSTEXEC -ne 0 ]]; then
 	echo "Executing \"$setup_exec\" ..."
-	sh -c $setup_exec
-	if [ $? -ne 0 ]; then
+	if ! sh -c $setup_exec; then
 		echo "Error: setup command failed!"; echo
 		echo "Aborting backup."; echo
 		exit 5
@@ -372,8 +368,7 @@ if [ -e "$PIDFILE" ]; then
 	echo
 	exit 4
 fi
-touch "$PIDFILE" 2>/dev/null
-if [ $? -ne 0 ]; then
+if ! touch "$PIDFILE" 2>/dev/null; then
 	echo "Warning: can't create PID file \"$PIDFILE\"!"
 	echo
 else
@@ -382,8 +377,7 @@ fi
 
 if [[ -n "$pre_exec" && $PREPOSTEXEC -ne 0 ]]; then
 	echo "Executing \"$pre_exec\" ..."
-	sh -c $pre_exec
-	if [ $? -ne 0 ]; then
+	if ! sh -c $pre_exec; then
 		echo "Error: pre-exec command failed!"; echo
 		CleanUp
 		echo "Aborting backup."; echo
@@ -464,8 +458,7 @@ for f in "${sys[@]}"; do
 	[[ "$local" -eq 1 ]] && tags="$tags,LOCAL"
 	# Check tags
 	if [[ -n "$TAG" && "$TAG" != "ALL" ]]; then
-		echo "$tags" | grep -E "(^|,)$TAG(,|$)" >/dev/null 2>&1
-		if [ $? -ne 0 ]; then
+		if ! echo "$tags" | grep -E "(^|,)$TAG(,|$)" >/dev/null 2>&1; then
 			if [ "$DRYRUN" -ne 0 ]; then
 				echo "Tags of system \"$system\" don't match \"$TAG\": \"$tags\". Skipped."
 				echo
@@ -520,11 +513,11 @@ for f in "${sys[@]}"; do
 	sys_root="$sys_target"
 	if [[ "$DRYRUN" -eq 0 && ! -e "$sys_target" ]]; then
 		if [ $generations -gt 0 ]; then
-			CreateSubvolume "$sys_target"
+			CreateSubvolume "$sys_target"; r=$?
 		else
-			mkdir -p "$sys_target"
+			mkdir -p "$sys_target"; r=$?
 		fi
-		if [ $? -ne 0 ]; then
+		if [ $r -ne 0 ]; then
 			echo "Can't create \"$sys_target\"!? \"$system\" skipped!"
 			echo; continue
 		fi
@@ -532,8 +525,7 @@ for f in "${sys[@]}"; do
 
 	if [[ "$local" -eq 0 && "$ping" -ne 0 ]]; then
 		# Check if system is alive
-		ping -c 1 "$system" >/dev/null 2>&1
-		if [ $? -ne 0 ]; then
+		if ! ping -c 1 "$system" >/dev/null 2>&1; then
 			echo "Host \"$system\" seems not to be alive!? Skipped."
 			echo; continue
 		fi
@@ -554,8 +546,7 @@ for f in "${sys[@]}"; do
 		if [[ -n "$last" && ! -e "$last/.stamp" ]]; then
 			# Old backup directory without "stamp file", continue
 			echo "Found incomplete snapshot in \"$last\", reusing and renaming it ..."
-			RenameSubvolume "$last" "$sys_target"
-			if [ $? -ne 0 ]; then
+			if ! RenameSubvolume "$last" "$sys_target"; then
 				echo "Failed to rename last snapshot \"$last\" to \"$sys_target\"!? \"$system\" skipped!"
 				echo; continue
 			fi
@@ -724,9 +715,8 @@ for f in "${sys[@]}"; do
 				# shellcheck disable=SC2086
 				echo "Removing backup from" $last "..."
 				if [ "$DRYRUN" -eq 0 ]; then
-					DeleteSubvolume "$dir"
-					[ $? -eq 0 ] || \
-					  echo "Failed to delete \"$dir\"!"
+					DeleteSubvolume "$dir" \
+						|| echo "Failed to delete \"$dir\"!"
 				fi
 			done
 			echo -n "Clean up finished: "; date
