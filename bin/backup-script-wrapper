@@ -13,7 +13,7 @@
 if [ -z "$MAILTO" ]; then
 	if id "logcheck" >/dev/null 2>&1; then
 		MAILTO="logcheck"
-	elif fgrep "logcheck:" /etc/aliases >/dev/null 2>&1; then
+	elif grep -F "logcheck:" /etc/aliases >/dev/null 2>&1; then
 		MAILTO="logcheck"
 	else
 		MAILTO="root"
