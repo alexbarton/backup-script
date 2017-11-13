@@ -1,6 +1,6 @@
 #
 # backup-script system for cloning systems using rsync
-# Copyright (c)2008-2015 Alexander Barton <alex@barton.de>
+# Copyright (c)2008-2017 Alexander Barton <alex@barton.de>
 #
 
 include ../lib/Makefile.ax
@@ -18,7 +18,7 @@ install-local:
 	 $(DESTDIR)$(PREFIX)/sbin/backup-audit
 
 check-local:
-	./backup-script --help | fgrep 'Usage: ' >/dev/null
-	./backup-script --help | fgrep 'Configuration file is "' >/dev/null
-	./backup-status --help | fgrep 'Usage: ' >/dev/null
-	./backup-audit --help | fgrep 'Usage: ' >/dev/null
+	./backup-script --help 2>&1 | grep -F 'Usage: ' >/dev/null
+	./backup-script --help 2>&1 | grep -F 'Configuration file is "' >/dev/null
+	./backup-status --help | grep -F 'Usage: ' >/dev/null
+	./backup-audit --help | grep -F 'Usage: ' >/dev/null
