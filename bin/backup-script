@@ -53,6 +53,10 @@ default_job_pre_exec=""
 default_job_post_exec=""
 default_tags=""
 
+# Set shell options.
+shopt -s nullglob
+set -o pipefail
+
 Usage() {
 	{
 		echo "Usage: $NAME [<options>] [<job> [<job> [...]]]"
