@@ -31,7 +31,6 @@ default_target="/var/backups"
 
 # Set shell options.
 shopt -s nullglob
-set -o pipefail
 
 # Search configuration file (last one is used as default!)
 for conf in \

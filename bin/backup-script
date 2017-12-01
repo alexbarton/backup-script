@@ -55,7 +55,6 @@ default_tags=""
 
 # Set shell options.
 shopt -s nullglob
-set -o pipefail
 
 Usage() {
 	{
