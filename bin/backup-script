@@ -94,7 +94,7 @@ GotSignal() {
 	ErrorMsg "--> Got signal, cleaning up & aborting ..."
 	echo
 	CleanUp
-	ErrorMsg -n "Aborted: " >&2; date
+	ErrorMsg "Aborted: $(date)" >&2
 	echo
 	sleep 3
 	exit 9
@@ -107,7 +107,7 @@ ExecJob() {
 	echo "Running job ${what}-exec command ..."
 	[ "$local" -eq 0 ] \
 		&& cmd="$ssh_cmd ${user}@${system} $cmd"
-	echo -n "Start date (${what}-exec): "; date
+	echo "Start date (${what}-exec): $(date)"
 	echo "$cmd"
 	if [ "$DRYRUN" -eq 0 ]; then
 		$SHELL -c "$cmd"; local ret=$?
@@ -328,7 +328,7 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
-echo -n "Started: "; date
+echo "Started: $(date)"
 echo -e "$config_info"
 
 # Check rsync and its protocol version
@@ -375,7 +375,7 @@ if [ -e "$PIDFILE" ]; then
 	ErrorMsg "Lockfile \"$PIDFILE\" already exists."
 	ErrorMsg "Is an other instance still running?"
 	echo
-	ErrorMsg -n "Aborted: " >&2; date
+	ErrorMsg "Aborted: $(date)" >&2
 	echo
 	exit 4
 fi
@@ -657,7 +657,7 @@ for f in "${sys[@]}"; do
 	fi
 
 	echo "Backing up to \"$sys_target\" ..."
-	echo -n "Start date: "; date
+	echo "Start date: $(date)"
 	echo "$cmd"
 	count_started=$count_started+1
 	ok=0
@@ -689,7 +689,7 @@ for f in "${sys[@]}"; do
 		GotSignal
 	fi
 
-	echo -n "End date: "; date
+	echo "End date: $(date)"
 	if [[ $ret -eq 0 || $ret -eq 24 ]]; then
 		[ $ret -eq 24 ] && count_ok_vanished=$count_ok_vanished+1
 
@@ -734,7 +734,7 @@ for f in "${sys[@]}"; do
 						|| ErrorMsg "Failed to delete \"$dir\" of \"$system\"!"
 				fi
 			done
-			echo -n "Clean up finished: "; date
+			echo "Clean up finished: $(date)"
 		elif [ -n "$to_delete" ]; then
 			ErrorMsg "There have been errors for \"$system\", not cleaning up old generations!"
 		else
@@ -776,7 +776,7 @@ fi
 
 CleanUp
 
-echo -n "Done: "; date
+echo "Done: $(date)"
 echo
 [ $count_all -eq 1 ] && s="" || s="s"
 [ $count_enabled -eq $count_all ] \
