@@ -75,7 +75,7 @@ Usage() {
 }
 
 ErrorMsg () {
-	printf "%s\n" "$@" >&2
+	printf "%s\\n" "$@" >&2
 }
 
 CleanUp() {
@@ -303,7 +303,7 @@ if [ -r "$conf" ]; then
 else
 	config_info="${config_info} (not readable, using defaults)"
 fi
-config_info="${config_info},\nusing \"$conf_d\" as configuration directory."
+config_info="${config_info},\\nusing \"$conf_d\" as configuration directory."
 
 while [ $# -gt 0 ]; do
 	case "$1" in
