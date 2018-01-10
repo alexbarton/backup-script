@@ -646,7 +646,11 @@ for f in "${sys[@]}"; do
 			&& cmd="$cmd ${user}@${system}:$source_root $sys_target/" \
 			|| cmd="$cmd $source_root $sys_target/"
 	elif [[ "$backup_type" == "scp" ]]; then
-		cmd="scp"
+		# scp writes some warning messages to stderr (like "Connection
+		# to ... closed by remote host."), even when there is no error
+		# and the exit code is 0 ("no error"); therefore we redirect
+		# stderr to stdout to not confuse "mail wrapper scripts" etc.
+		cmd="scp 2>&1"
 		[ "$VERBOSE" -eq 0 ] && cmd="$cmd -q"
 		for file in $files; do
 			cmd="$cmd ${user}@${system}:$file $sys_target/"
