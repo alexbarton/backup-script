@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # backup-script system for cloning systems using rsync
-# Copyright (c)2008-2016 Alexander Barton, alex@barton.de
+# Copyright (c)2008-2018 Alexander Barton, alex@barton.de
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -194,6 +194,7 @@ DiffGenerations() {
 			/etc/aliases \
 			/etc/bash.bashrc \
 			/etc/crontab \
+			/etc/debian_version \
 			/etc/environment \
 			/etc/fstab \
 			/etc/hostname \
@@ -236,7 +237,11 @@ DiffGenerations() {
 			/etc/cron.hourly/ \
 			/etc/cron.monthly/ \
 			/etc/cron.weekly/ \
+			/etc/init.d/ \
 			/etc/sudoers.d/ \
+			/etc/systemd/network/ \
+			/etc/systemd/system/ \
+			/etc/systemd/user/ \
 			/var/log/dumps/ \
 		; do
 			[[ ! -d "${gen1_d}${dir}" ]] && continue
