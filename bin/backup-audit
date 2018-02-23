@@ -79,7 +79,7 @@ ListDirectory() {
 
 	local exclude
 
-	exclude='total '
+	exclude=' \.$'
 	if [[ "$dir_name" == "/" ]]; then
 		exclude="$exclude"'| \.stamp$| dev$| etc$| proc$| root$| run$| sys$| tmp$'
 		exclude="$exclude"'| data$| net$| srv$'
@@ -87,8 +87,8 @@ ListDirectory() {
 	fi
 
 	# shellcheck disable=SC2012
-	ls -Al "$base_dir$dir_name" 2>/dev/null \
-		| egrep -v "($exclude)" | awk '!($2="")' | column -t
+	find "$base_dir$dir_name". -maxdepth 1 -printf '%M %10u:%-10g %t %12s  %f\n' 2>/dev/null \
+		| LC_ALL=C sort -k 9 | grep -Ev "($exclude)"
 }
 
 HandleSystem() {
