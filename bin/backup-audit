@@ -140,9 +140,8 @@ HandleSystem() {
 	# shellcheck source=/dev/null
 	source "$latest_d/.stamp"
 
-	if [[ $code -ne 0 && $code -ne 24 ]]; then
-		echo "Last backup generation has errors, skipping system!"
-		echo; return 1
+	if [[ $code -ne 0 ]]; then
+		echo "Warning: Last backup generation had errors, code $code!"
 	fi
 
 	# Search previous generation without errors
