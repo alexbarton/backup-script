@@ -241,6 +241,10 @@ DiffGenerations() {
 			/etc/systemd/network/ \
 			/etc/systemd/system/ \
 			/etc/systemd/user/ \
+			/lib/systemd/network/ \
+			/lib/systemd/system/ \
+			/usr/lib/systemd/network/ \
+			/usr/lib/systemd/user/ \
 			/var/log/dumps/ \
 		; do
 			[[ ! -d "${gen1_d}${dir}" ]] && continue
