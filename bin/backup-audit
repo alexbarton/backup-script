@@ -91,6 +91,16 @@ ListDirectory() {
 		| LC_ALL=C sort -k 9 | grep -Ev "($exclude)"
 }
 
+ListFilesRecursive() {
+	local base_dir="$1"
+	local dir_name="$2"
+
+	(
+		cd "$base_dir" || return 1
+		find ".$dir_name" -type f -o -type l | cut -d'/' -f2-
+	)
+}
+
 HandleSystem() {
 	local fname="$1"
 
@@ -238,13 +248,6 @@ DiffGenerations() {
 			/etc/cron.weekly/ \
 			/etc/init.d/ \
 			/etc/sudoers.d/ \
-			/etc/systemd/network/ \
-			/etc/systemd/system/ \
-			/etc/systemd/user/ \
-			/lib/systemd/network/ \
-			/lib/systemd/system/ \
-			/usr/lib/systemd/network/ \
-			/usr/lib/systemd/user/ \
 			/var/log/dumps/ \
 		; do
 			[[ ! -d "${gen1_d}${dir}" ]] && continue
@@ -257,6 +260,36 @@ DiffGenerations() {
 			[[ $VERBOSE -ne 0 ]] && echo "Checking \"$dir\" ..."
 			ListDirectory "${gen1_d}" "${dir}" >"$tmp_1"
 			ListDirectory "${gen2_d}" "${dir}" >"$tmp_2"
+			if ! diff -U 0 "$tmp_1" "$tmp_2" >"$tmp_diff"; then
+				BeginDiff "\"$dir\" directory"
+				tail -n +3 "$tmp_diff" | grep -Ev '^@@ ' | PipeDiff
+				EndDiff
+				return_code=1
+			fi
+		done
+
+		for dir in \
+			/etc/systemd/network/ \
+			/etc/systemd/system/ \
+			/etc/systemd/user/ \
+			/lib/systemd/network/ \
+			/lib/systemd/system/ \
+			/lib/systemd/user/ \
+			/run/systemd/system/ \
+			/usr/lib/systemd/network/ \
+			/usr/lib/systemd/system/ \
+			/usr/lib/systemd/user/ \
+		; do
+			[[ ! -d "${gen1_d}${dir}" ]] && continue
+			[[ ! -d "${gen2_d}${dir}" ]] && continue
+
+			# Make sure that this is a system root; comparing other
+			# root folders results in misleading output ...
+			[[ "$dir" == "/" && ! -d "${gen1_d}${dir}/etc" ]] && continue
+
+			[[ $VERBOSE -ne 0 ]] && echo "Checking systemd hierarchy \"$dir\" ..."
+			ListFilesRecursive "${gen1_d}" "${dir}" >"$tmp_1"
+			ListFilesRecursive "${gen2_d}" "${dir}" >"$tmp_2"
 			if ! diff -U 0 "$tmp_1" "$tmp_2" >"$tmp_diff"; then
 				BeginDiff "\"$dir\" directory"
 				tail -n +3 "$tmp_diff" | grep -Ev '^@@ ' | PipeDiff
