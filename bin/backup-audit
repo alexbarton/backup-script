@@ -84,6 +84,7 @@ ListDirectory() {
 		exclude="$exclude"'| \.stamp$| dev$| etc$| proc$| root$| run$| sys$| tmp$'
 		exclude="$exclude"'| data$| net$| srv$'
 		exclude="$exclude"'| [[:alnum:]_-]+\.log(\.[[:alnum:]]+|)$'
+		exclude="$exclude"'| (aquota.user|aquota.group)$'
 	fi
 
 	# shellcheck disable=SC2012
