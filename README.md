@@ -3,9 +3,8 @@
 A script for backing up data using `ssh`(1), `rsync`(1), and `scp`(1).
 Can handle backup generations on *btrfs* and *ZFS*.
 
-Copyright (c)2008-2016 Alexander Barton (<alex@barton.de>)  
-Homepage: https://github.com/alexbarton/backup-script
-
+Copyright (c)2008-2022 Alexander Barton (<alex@barton.de>)  
+Homepage: <https://github.com/alexbarton/backup-script>
 
 ## Installation
 
@@ -70,11 +69,10 @@ Options:
 
 When no *job* is given, all defined jobs are checked.
 
-
 ## Configuration
 
 All default configuration variables are read from the first file found of this
-list: `/usr/local/etc/backup-scrupt.conf`, `/etc/backup-script.conf` or
+list: `/usr/local/etc/backup-script.conf`, `/etc/backup-script.conf` or
 from `/etc/backup-script.d/backup-script.conf` (deprecated).
 
 All jobs that should be backed-up are configured using individual files
@@ -98,19 +96,17 @@ For example:
 - `/etc/backups-script.d/host01.example.net`: configuration for host 1
 - `/etc/backups-script.d/clientXY.example.com`: configuration for host 2
 
-
 ### Global Settings
 
 The following global configuration options exist:
 
-- `setup_exec`: Script to run _before_ creating the lock file etc.
+- `setup_exec`: Script to run *before* creating the lock file etc.
 - `pre_exec`: Pre-execution script, run before all jobs.
 - `post_exec`: Post-execution script, run after all jobs.
 
 In Addition, all job configuration options (see below) that have a "default_XXX"
 variant can be used and define default values for all jobs that don't overwrite
 them individually.
-
 
 ## Configuration Variables
 
@@ -135,7 +131,7 @@ Backup type to use. Default: `rsync`.
 
 Please note that neither `ssh_args_add`, `rsync_args_add`, `compress`, nor any
 "exclude" parameters are supported when using the "scp" backup type! And There
-"scp" backup type never _deletes_ files from the backup store; so if you reduce
+"scp" backup type never *deletes* files from the backup store; so if you reduce
 the list of files to backup, old files will still be kept, because they were
 already saved in an older generation (but no longer updated).
 
@@ -208,11 +204,11 @@ inside of the target directory.
 
 Supported file systems are:
 
- * *btrfs*:
-   All generations are btrfs subvolumes and named after the date and time.
- * *ZFS*:
-   All generations are ZFS file systems. Latest generation is named `current`,
-   elders are links to the ZFS snapshot directories.
+- *btrfs*:
+  All generations are btrfs subvolumes and named after the date and time.
+- *ZFS*:
+  All generations are ZFS file systems. Latest generation is named `current`,
+  elders are links to the ZFS snapshot directories.
 
 The latest snapshot is always reachable using a symlink named `latest`
 inside the system directory.
@@ -250,11 +246,10 @@ The following job configurations variables used by the outdated backup-pull(1)
 script in job definition files are automatically mapped to the new backup-script
 variables:
 
-* `host` -> `system`
-* `source` -> `source_root`
-* `pre_exec` -> `job_pre_exec`
-* `post_exec` -> `job_post_exec`
-
+- `host` -> `system`
+- `source` -> `source_root`
+- `pre_exec` -> `job_pre_exec`
+- `post_exec` -> `job_post_exec`
 
 ## Exit codes
 
