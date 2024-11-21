@@ -3,7 +3,7 @@
 A script for backing up data using `ssh`(1), `rsync`(1), and `scp`(1).
 Can handle backup generations on *btrfs* and *ZFS*.
 
-Copyright (c)2008-2022 Alexander Barton (<alex@barton.de>)  
+Copyright (c)2008-2024 Alexander Barton (<alex@barton.de>)  
 Homepage: <https://github.com/alexbarton/backup-script>
 
 ## Installation

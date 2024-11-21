@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # backup-script system for cloning systems using rsync
-# Copyright (c)2008-2017 Alexander Barton <alex@barton.de>
+# Copyright (c)2008-2024 Alexander Barton <alex@barton.de>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -81,6 +81,7 @@ ErrorMsg () {
 CleanUp() {
 	if [[ -n "$pre_exec" && $PREPOSTEXEC -ne 0 ]]; then
 		echo "Executing \"$post_exec\" ..."
+		# shellcheck disable=SC2086
 		if ! sh -c $post_exec; then
 			ErrorMsg "Warning: post-exec command failed!"
 		fi
@@ -115,12 +116,12 @@ ExecJob() {
 		echo " *** Trial run, not executing ${what}-exec command!"
 		ret=0
 	fi
-	if [ $ret -eq 0 ]; then
+	if [ "$ret" -eq 0 ]; then
 		echo "The ${what}-exec command completed with status 0, OK."
 	else
 		ErrorMsg "The ${what}-exec command completed with ERRORS, code $ret!"
 	fi
-	return $ret
+	return "$ret"
 }
 
 GetFS() {
@@ -360,6 +361,7 @@ fi
 
 if [[ -n "$setup_exec" && $PREPOSTEXEC -ne 0 ]]; then
 	echo "Executing \"$setup_exec\" ..."
+	# shellcheck disable=SC2086
 	if ! sh -c $setup_exec; then
 		ErrorMsg "Error: setup command failed!"; echo
 		ErrorMsg "Aborting backup."; echo
@@ -389,6 +391,7 @@ fi
 
 if [[ -n "$pre_exec" && $PREPOSTEXEC -ne 0 ]]; then
 	echo "Executing \"$pre_exec\" ..."
+	# shellcheck disable=SC2086
 	if ! sh -c $pre_exec; then
 		ErrorMsg "Error: pre-exec command failed!"; echo
 		CleanUp
@@ -547,7 +550,7 @@ for f in "${sys[@]}"; do
 	if [ $generations -gt 0 ]; then
 		# Make sure no old backup is stored in system directory
 		if [ -e "$sys_target/.stamp" ]; then
-			# There seems to be a genearation-less backup in the
+			# There seems to be a generation-less backup in the
 			# target directory!
 			ErrorMsg "Target directory \"$sys_target\" seems to be unclean!? \"$system\" skipped!"
 			echo; continue

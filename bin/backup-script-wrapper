@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # backup-script system for cloning systems using rsync
-# Copyright (c)2008-2016 Alexander Barton, alex@barton.de
+# Copyright (c)2008-2024 Alexander Barton, alex@barton.de
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -63,6 +63,6 @@ esac
 mail -s "$HOST: $SUBJECT" "$MAILTO" <"$TMP"
 
 rm -f "$TMP"
-exit $r
+exit "${r}"
 
 # -eof-
