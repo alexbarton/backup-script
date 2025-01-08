@@ -679,6 +679,7 @@ for f in "${sys[@]}"; do
 		$SHELL -c "$cmd"; ret=$?
 		end_t=$(date "+%s")
 
+		# Update the "stamp file":
 		{
 			echo "code=$ret"
 			echo "start_t=$start_t"
@@ -687,6 +688,12 @@ for f in "${sys[@]}"; do
 			echo "backup_host='$(hostname -f)'"
 			echo "backup_user='$(id -un)'"
 		} >"$stamp_file"
+		# And forcefully update the time stamp of the backup directory
+		# (so that the backup folder is sorted correctly in "ls -t",
+		# which is used to clean up old backup generations, if any). In
+		# some circumstances, "only" recreating the "stamp file" did NOT
+		# change the folder modification time!?
+		touch "$sys_target"
 	else
 		echo " *** Trial run, not executing save command!"
 		ret=0
