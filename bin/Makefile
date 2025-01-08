@@ -18,6 +18,11 @@ install-local:
 	 "$(DESTDIR)$(PREFIX)/sbin/backup-audit"
 
 check-local:
+	if command -v shellcheck; then \
+		shellcheck backup-audit backup-script backup-script-wrapper backup-status; \
+	  else \
+	  	echo 'Warning: "shellcheck" not found! Check SKIPPED!'; \
+	  fi
 	./backup-script --help 2>&1 | grep -F 'Usage: ' >/dev/null
 	./backup-script --help 2>&1 | grep -F 'Configuration file is "' >/dev/null
 	./backup-status --help | grep -F 'Usage: ' >/dev/null
