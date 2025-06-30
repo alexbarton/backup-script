@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # backup-script system for cloning systems using rsync
-# Copyright (c)2008-2024 Alexander Barton, alex@barton.de
+# Copyright (c)2008-2025 Alexander Barton, alex@barton.de
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ Usage() {
 	echo "       $NAME <-d|--dirs> <dir1> <dir2>"
 	echo
 	echo "  -d, --dirs      Compare two backup directories (not jobs)."
-	echo "  -q, --quiet     Quite mode, only list jobs with changes or errors."
+	echo "  -q, --quiet     Quiet mode, only list jobs with changes or errors."
 	echo "  -v, --verbose   Verbose mode, show all checks that are run."
 	echo
 	echo "When no <job> is given, all defined jobs are checked."

@@ -3,7 +3,7 @@
 A script for backing up data using `ssh`(1), `rsync`(1), and `scp`(1).
 Can handle backup generations on *btrfs* and *ZFS*.
 
-Copyright (c)2008-2024 Alexander Barton (<alex@barton.de>)  
+Copyright (c)2008-2025 Alexander Barton (<alex@barton.de>)  
 Homepage: <https://github.com/alexbarton/backup-script>
 
 ## Installation
@@ -51,7 +51,7 @@ Options:
 - `-e`, `--errors`: only show current backups with errors (implies `--latest`).
 - `-l`, `--latest`: only show latest backup generations.
 - `-q`, `--quick`: *quick mode*, don't calculate backup sizes.
-- `-r`, `--running`: check if an `backup-script` task is currently running.
+- `-r`, `--running`: check if a `backup-script` task is currently running.
 
 When no *job* is given, all defined jobs are listed.
 
@@ -64,7 +64,7 @@ Usage: `backup-audit [-q] [-v] [<job> [<job> [...]]]`
 Options:
 
 - `-d`, `--dirs`: compare two backup directories (not jobs).
-- `-q`, `--quiet`: *quite mode*, only list jobs with changes or errors.
+- `-q`, `--quiet`: *quiet mode*, only list jobs with changes or errors.
 - `-v`, `--verbose`: *verbose mode*, show all checks that are run.
 
 When no *job* is given, all defined jobs are checked.
@@ -80,10 +80,11 @@ in the configuration directory, which is `/usr/local/etc/backup-script.d/` or
 `/etc/backup-script.d/` by default (whichever is found first), and can be
 specified using the `conf_d` variable in the main configuration file.
 
-The must be one job file for each system to backup (files ending in `*.sh` are
+There must be one job file per system to backup (files ending in `*.sh` are
 skipped, as well as files named `backup-script.conf`). Please avoid spaces and
-other "special" characters! The filename is used as hostname for the system by
-default, but this can be overwritten using the `system` configuration variable.
+other "special" characters in its filename! The filename is used as hostname
+for the system by default, but this can be overwritten using the `system`
+configuration variable.
 
 Variables in `backup-script.conf` must be prefixed with `default_` to define
 default values for all jobs.
@@ -130,7 +131,7 @@ Backup type to use. Default: `rsync`.
   "success" in the summary and exit code of the backup script.
 
 Please note that neither `ssh_args_add`, `rsync_args_add`, `compress`, nor any
-"exclude" parameters are supported when using the "scp" backup type! And There
+"exclude" parameters are supported when using the "scp" backup type! And the
 "scp" backup type never *deletes* files from the backup store; so if you reduce
 the list of files to backup, old files will still be kept, because they were
 already saved in an older generation (but no longer updated).
